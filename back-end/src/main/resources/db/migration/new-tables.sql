@@ -65,3 +65,23 @@ ALTER TABLE product ADD CONSTRAINT fk_product_category FOREIGN KEY (category_id)
 ALTER TABLE product ADD CONSTRAINT fk_product_supplier FOREIGN KEY (supplier_id) REFERENCES supplier(id) ON DELETE SET NULL;
 
 ALTER TABLE inventory ADD COLUMN IF NOT EXISTS low_stock_threshold INT DEFAULT 10;
+
+-- 4. Insert Sample Data for new independent tables (Categories, Suppliers, and Users)
+-- (Using INSERT IGNORE to prevent duplicate errors on re-runs)
+
+INSERT IGNORE INTO category (id, name, description) VALUES
+(1, 'Electronics', 'Smartphones, laptops, accessories, and gadgets'),
+(2, 'Home Appliances', 'Kitchen equipment, home comfort, and laundry systems'),
+(3, 'Apparel', 'Clothing, garments, footwear, and accessories');
+
+INSERT IGNORE INTO supplier (id, name, contact_email, phone, address) VALUES
+(1, 'TechDistributors Inc.', 'contact@techdistributors.com', '+1-555-0101', '123 Tech Blvd, Silicon Valley'),
+(2, 'HomeGoods Wholesalers', 'info@homegoods.com', '+1-555-0202', '456 Appliance Way, Industrial District'),
+(3, 'Modern Apparel Ltd.', 'sales@modernapparel.com', '+1-555-0303', '789 Fashion Ave, Apparel Town');
+
+-- Insert default users with BCrypt-hashed password: "password"
+INSERT IGNORE INTO users (id, username, email, password_hash, role) VALUES
+(1, 'admin', 'admin@example.com', '$2a$10$tZ2qM/d1qW/w0XU/eH9lDeB8Vq55aW.nE0cOux3y.bU8y5uO0tC0e', 'ADMIN'),
+(2, 'manager', 'manager@example.com', '$2a$10$tZ2qM/d1qW/w0XU/eH9lDeB8Vq55aW.nE0cOux3y.bU8y5uO0tC0e', 'MANAGER'),
+(3, 'employee', 'employee@example.com', '$2a$10$tZ2qM/d1qW/w0XU/eH9lDeB8Vq55aW.nE0cOux3y.bU8y5uO0tC0e', 'EMPLOYEE');
+
