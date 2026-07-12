@@ -74,9 +74,28 @@
         </div>
 
     </div>
+    <div id="reviewPaginationControls" class="container" style="text-align: center; margin-top: 20px;"></div>
 
     <script>
         const apiURL = 'http://localhost:8081';
+
+        // Automatically intercept fetch to inject JWT Bearer token
+        const originalFetch = window.fetch;
+        window.fetch = function (url, options = {}) {
+            options.headers = options.headers || {};
+            const token = localStorage.getItem("accessToken");
+            if (token) {
+                if (options.headers instanceof Headers) {
+                    options.headers.set("Authorization", `Bearer ${token}`);
+                } else {
+                    options.headers["Authorization"] = `Bearer ${token}`;
+                }
+            }
+            return originalFetch(url, options);
+        };
+
+        let reviewsPage = 0;
+        let reviewsSize = 3;
 
         window.onload = () => {
             
@@ -103,7 +122,7 @@
                 reviewsContainer.innerHTML = '<div style="text-align:center; padding: 20px; font-weight:bold; color: white;">Loading reviews...</div>';
             }
 
-            let url = `${apiURL}/reviews/${storeId}/${productId}`;
+            let url = `${apiURL}/reviews/${storeId}/${productId}?page=${reviewsPage}&size=${reviewsSize}&sort=id,asc`;
             fetch(url, {
                 method: "GET",
                 headers: { "content-type": "application/json" }
@@ -118,9 +137,11 @@
                     if (reviewsContainer) {
                         if (!data.reviews || data.reviews.length === 0) {
                             reviewsContainer.innerHTML = '<div style="text-align:center; padding: 20px; color: white; font-weight: bold;">No reviews available for this product yet.</div>';
+                            renderReviewPagination(0, storeId, productId);
                         } else {
                             reviewsContainer.innerHTML = '<div class="row"><div class="col"></div><div class="col"></div><div class="col"></div></div>';
                             createReview(data.reviews);
+                            renderReviewPagination(data.totalPages, storeId, productId);
                         }
                     }
                 })
@@ -190,6 +211,46 @@
             button=document.getElementById('backButton');
             storeId=button.value;
             location.href = `index.html?id=navBar3&storeid=${storeId}`;
+        }
+
+        function renderReviewPagination(totalPages, storeId, productId) {
+            const controls = document.getElementById('reviewPaginationControls');
+            if (!controls) return;
+            controls.innerHTML = '';
+            if (totalPages <= 1) return;
+
+            const prevBtn = document.createElement('button');
+            prevBtn.textContent = 'Previous';
+            prevBtn.disabled = reviewsPage === 0;
+            prevBtn.style.marginRight = '10px';
+            prevBtn.style.padding = '5px 10px';
+            prevBtn.onclick = () => {
+                if (reviewsPage > 0) {
+                    reviewsPage--;
+                    getReviews(storeId, productId);
+                }
+            };
+
+            const info = document.createElement('span');
+            info.textContent = ` Page ${reviewsPage + 1} of ${totalPages} `;
+            info.style.color = 'white';
+            info.style.fontWeight = 'bold';
+
+            const nextBtn = document.createElement('button');
+            nextBtn.textContent = 'Next';
+            nextBtn.disabled = reviewsPage >= totalPages - 1;
+            nextBtn.style.marginLeft = '10px';
+            nextBtn.style.padding = '5px 10px';
+            nextBtn.onclick = () => {
+                if (reviewsPage < totalPages - 1) {
+                    reviewsPage++;
+                    getReviews(storeId, productId);
+                }
+            };
+
+            controls.appendChild(prevBtn);
+            controls.appendChild(info);
+            controls.appendChild(nextBtn);
         }
 
     </script>

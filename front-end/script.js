@@ -1,4 +1,24 @@
 const apiURL = 'http://localhost:8081';
+
+// Automatically intercept fetch to inject JWT Bearer token
+const originalFetch = window.fetch;
+window.fetch = function (url, options = {}) {
+    options.headers = options.headers || {};
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+        if (options.headers instanceof Headers) {
+            options.headers.set("Authorization", `Bearer ${token}`);
+        } else {
+            options.headers["Authorization"] = `Bearer ${token}`;
+        }
+    }
+    return originalFetch(url, options);
+};
+
+let productPage = 0;
+let productSize = 5;
+let inventoryPage = 0;
+let inventorySize = 5;
 let students = [];
 let Ordercount = 1;
 let deleteRow = [];
@@ -255,6 +275,7 @@ function addStore(event) {
 function viewProduct(event) {
     if (event) {
         event.preventDefault();
+        inventoryPage = 0;
     }
 
     let inputstoreId = document.getElementById('vstoreId');
@@ -270,7 +291,7 @@ function viewProduct(event) {
         tableBody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Loading products and inventory...</td></tr>';
     }
 
-    let url = `${apiURL}/inventory/${storeId}`;
+    let url = `${apiURL}/inventory/${storeId}?page=${inventoryPage}&size=${inventorySize}&sort=id,asc`;
     fetch(url, {
         method: "GET",
         headers: { "content-type": "application/json" },
@@ -284,10 +305,12 @@ function viewProduct(event) {
         .then(data => {
             if (data.products && data.products.length > 0) {
                 createData(data.products, storeId);
+                renderInventoryPagination(data.totalPages, storeId);
             } else {
                 if (tableBody) {
                     tableBody.innerHTML = '<tr><td colspan="9" style="text-align:center;">No products found in this store\'s inventory.</td></tr>';
                 }
+                renderInventoryPagination(0, storeId);
             }
         })
         .catch(error => {
@@ -607,7 +630,7 @@ function viewProductList() {
         allProducts.innerHTML = '<tr><td colspan="7" style="text-align:center;">Loading parent products...</td></tr>';
     }
 
-    let url = `${apiURL}/product`;
+    let url = `${apiURL}/product?page=${productPage}&size=${productSize}&sort=id,asc`;
     fetch(url, {
         method: "GET",
         headers: { "content-type": "application/json" },
@@ -621,12 +644,14 @@ function viewProductList() {
         .then(data => {
             if (data.products && data.products.length > 0) {
                 showProductsInTable(data.products);
+                renderProductPagination(data.totalPages);
             }
             else {
                 if (allProducts) {
                     allProducts.innerHTML = '<tr><td colspan="7" style="text-align:center;">No parent products found.</td></tr>';
                 }
                 resetForm();
+                renderProductPagination(0);
                 return;
             }
         })
@@ -994,4 +1019,84 @@ async function placeOrder(event) {
     } catch (error) {
         alert('Error placing order:', error);
     }
+}
+
+function renderProductPagination(totalPages) {
+    const controls = document.getElementById('paginationControls');
+    if (!controls) return;
+    controls.innerHTML = '';
+    if (totalPages <= 1) return;
+
+    const prevBtn = document.createElement('button');
+    prevBtn.textContent = 'Previous';
+    prevBtn.disabled = productPage === 0;
+    prevBtn.style.marginRight = '10px';
+    prevBtn.style.padding = '5px 10px';
+    prevBtn.onclick = () => {
+        if (productPage > 0) {
+            productPage--;
+            viewProductList();
+        }
+    };
+
+    const info = document.createElement('span');
+    info.textContent = ` Page ${productPage + 1} of ${totalPages} `;
+    info.style.color = 'white';
+    info.style.fontWeight = 'bold';
+
+    const nextBtn = document.createElement('button');
+    nextBtn.textContent = 'Next';
+    nextBtn.disabled = productPage >= totalPages - 1;
+    nextBtn.style.marginLeft = '10px';
+    nextBtn.style.padding = '5px 10px';
+    nextBtn.onclick = () => {
+        if (productPage < totalPages - 1) {
+            productPage++;
+            viewProductList();
+        }
+    };
+
+    controls.appendChild(prevBtn);
+    controls.appendChild(info);
+    controls.appendChild(nextBtn);
+}
+
+function renderInventoryPagination(totalPages, storeId) {
+    const controls = document.getElementById('inventoryPaginationControls');
+    if (!controls) return;
+    controls.innerHTML = '';
+    if (totalPages <= 1) return;
+
+    const prevBtn = document.createElement('button');
+    prevBtn.textContent = 'Previous';
+    prevBtn.disabled = inventoryPage === 0;
+    prevBtn.style.marginRight = '10px';
+    prevBtn.style.padding = '5px 10px';
+    prevBtn.onclick = () => {
+        if (inventoryPage > 0) {
+            inventoryPage--;
+            viewProduct(null);
+        }
+    };
+
+    const info = document.createElement('span');
+    info.textContent = ` Page ${inventoryPage + 1} of ${totalPages} `;
+    info.style.color = 'white';
+    info.style.fontWeight = 'bold';
+
+    const nextBtn = document.createElement('button');
+    nextBtn.textContent = 'Next';
+    nextBtn.disabled = inventoryPage >= totalPages - 1;
+    nextBtn.style.marginLeft = '10px';
+    nextBtn.style.padding = '5px 10px';
+    nextBtn.onclick = () => {
+        if (inventoryPage < totalPages - 1) {
+            inventoryPage++;
+            viewProduct(null);
+        }
+    };
+
+    controls.appendChild(prevBtn);
+    controls.appendChild(info);
+    controls.appendChild(nextBtn);
 }

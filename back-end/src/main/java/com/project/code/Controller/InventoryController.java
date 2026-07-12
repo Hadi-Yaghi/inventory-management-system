@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import io.swagger.v3.oas.annotations.Operation;
@@ -125,16 +126,14 @@ public class InventoryController {
     @Operation(summary = "Filter inventory products by category and name", description = "Filter inventory products in a specific store by category and name.")
     @ApiResponse(responseCode = "200", description = "Successfully retrieved filtered products")
     public Map<String, Object> getProductName(@PathVariable String category, @PathVariable String name,
-                                              @PathVariable long storeid) {
+            @PathVariable long storeid) {
         Map<String, Object> map = new HashMap<>();
-        if (category.equals("null") ) {
+        if (category.equals("null")) {
             map.put("product", productRepository.findByNameLike(storeid, name));
             return map;
-        }
-        else if(name.equals("null"))
-        {
+        } else if (name.equals("null")) {
             System.out.println("name is null");
-            map.put("product", productRepository.findByCategoryAndStoreId(storeid,category));
+            map.put("product", productRepository.findByCategoryAndStoreId(storeid, category));
             return map;
         }
         map.put("product", productRepository.findByNameAndCategory(storeid, name, category));
@@ -144,8 +143,7 @@ public class InventoryController {
     @GetMapping("search/{name}/{storeId}")
     @Operation(summary = "Search inventory products by name", description = "Retrieve products in a store matching a name query.")
     @ApiResponse(responseCode = "200", description = "Successfully retrieved search results")
-    public Map<String,Object> searchProduct(@PathVariable String name, @PathVariable long storeId)
-    {
+    public Map<String, Object> searchProduct(@PathVariable String name, @PathVariable long storeId) {
         Map<String, Object> map = new HashMap<>();
         map.put("product", productRepository.findByNameLike(storeId, name));
         return map;
@@ -170,7 +168,7 @@ public class InventoryController {
     @Operation(summary = "Validate stock quantity", description = "Check if the store has enough stock level for a product.")
     @ApiResponse(responseCode = "200", description = "True if stock level is sufficient, false otherwise")
     public boolean validateQuantity(@PathVariable int quantity, @PathVariable long storeId,
-                                    @PathVariable long productId) {
+            @PathVariable long productId) {
         Inventory result = inventoryRepository.findByProductIdAndStoreId(productId, storeId);
         if (result.getStockLevel() >= quantity) {
             return true;
