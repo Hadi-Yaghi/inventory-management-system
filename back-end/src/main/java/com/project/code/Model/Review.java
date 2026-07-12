@@ -20,6 +20,11 @@ private String id;
 
   private int rating;
   private String comment;
+  private String title;
+  private java.util.List<String> photoUrls = new java.util.ArrayList<>();
+  private boolean verifiedPurchase = false;
+  private int likes = 0;
+  private java.util.List<ReviewReply> replies = new java.util.ArrayList<>();
 
     public Review(Long customerId, Long productId, Long storeId, int rating) {
         this.customerId = customerId;
@@ -75,6 +80,46 @@ private String id;
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public java.util.List<String> getPhotoUrls() {
+        return photoUrls;
+    }
+
+    public void setPhotoUrls(java.util.List<String> photoUrls) {
+        this.photoUrls = photoUrls;
+    }
+
+    public boolean isVerifiedPurchase() {
+        return verifiedPurchase;
+    }
+
+    public void setVerifiedPurchase(boolean verifiedPurchase) {
+        this.verifiedPurchase = verifiedPurchase;
+    }
+
+    public int getLikes() {
+        return likes;
+    }
+
+    public void setLikes(int likes) {
+        this.likes = likes;
+    }
+
+    public java.util.List<ReviewReply> getReplies() {
+        return replies;
+    }
+
+    public void setReplies(java.util.List<ReviewReply> replies) {
+        this.replies = replies;
     }
 
     public Review() {

@@ -93,7 +93,18 @@ public class SecurityConfig {
                 // 7. Image file upload mutations restricted to ADMIN, MANAGER
                 .requestMatchers(HttpMethod.POST, "/uploads").hasAnyRole("ADMIN", "MANAGER")
 
-                // 8. Read access everywhere
+                // 8. Order Status Tracking
+                .requestMatchers(HttpMethod.PUT, "/orders/*/status").hasAnyRole("ADMIN", "MANAGER")
+
+                // 9. Returns & Refunds
+                .requestMatchers(HttpMethod.POST, "/returns/request").hasAnyRole("ADMIN", "MANAGER", "EMPLOYEE")
+                .requestMatchers(HttpMethod.POST, "/returns/*/approve", "/returns/*/reject").hasAnyRole("ADMIN", "MANAGER")
+
+                // 10. Reviews mutations
+                .requestMatchers(HttpMethod.POST, "/reviews").hasAnyRole("ADMIN", "MANAGER", "EMPLOYEE")
+                .requestMatchers(HttpMethod.POST, "/reviews/*/like", "/reviews/*/reply").hasAnyRole("ADMIN", "MANAGER", "EMPLOYEE")
+
+                // 11. Read access everywhere
                 .requestMatchers(HttpMethod.GET, "/**").hasAnyRole("ADMIN", "MANAGER", "EMPLOYEE")
 
                 // Any other request must be authenticated

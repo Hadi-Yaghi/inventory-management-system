@@ -29,6 +29,12 @@ public class OrderService {
     @Autowired
     private OrderItemRepository orderItemRepository;
 
+    @Autowired
+    private PdfInvoiceService pdfInvoiceService;
+
+    @Autowired
+    private EmailService emailService;
+
     @Transactional
     public void saveOrder(PlaceOrderRequestDTO placeOrderRequest){
         List<PurchaseProductDTO> purchaseProducts = placeOrderRequest.getPurchaseProduct();
@@ -52,7 +58,6 @@ public class OrderService {
 
         if(existingcustomer ==null){
             customer = customerRepository.save(customer);
-
         }
         else{
             customer=existingcustomer;
@@ -66,9 +71,11 @@ public class OrderService {
         orderDetails.setStore(store);
         orderDetails.setTotalPrice(placeOrderRequest.getTotalPrice());
         orderDetails.setDate(java.time.LocalDateTime.now());
+        orderDetails.setOrderStatus(OrderStatus.PENDING);
 
         orderDetails = orderDetailsRepository.save(orderDetails);
 
+        java.util.ArrayList<OrderItem> itemsList = new java.util.ArrayList<>();
         if (purchaseProducts != null) {
             for (PurchaseProductDTO productDTO : purchaseProducts) {
                 OrderItem orderItem = new OrderItem();
@@ -81,8 +88,66 @@ public class OrderService {
                 orderItem.setQuantity(productDTO.getQuantity());
                 orderItem.setPrice(productDTO.getPrice()*productDTO.getQuantity());
                 orderItemRepository.save(orderItem);
+                itemsList.add(orderItem);
+            }
+        }
+        orderDetails.setOrderItems(itemsList);
+
+        // Generate PDF Invoice and send email confirmation
+        try {
+            byte[] pdfBytes = pdfInvoiceService.generateInvoicePdf(orderDetails);
+            emailService.sendOrderConfirmation(orderDetails, pdfBytes);
+        } catch (Exception e) {
+            System.err.println("Could not generate or send PDF invoice: " + e.getMessage());
+        }
+    }
+
+    @Transactional
+    public void transitionStatus(Long orderId, OrderStatus newStatus) {
+        OrderDetails order = orderDetailsRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Order not found with ID: " + orderId));
+
+        OrderStatus currentStatus = order.getOrderStatus();
+        if (currentStatus == newStatus) {
+            return;
+        }
+
+        // Validate allowed transitions
+        if (currentStatus == OrderStatus.COMPLETED || currentStatus == OrderStatus.CANCELLED) {
+            throw new IllegalArgumentException("Cannot transition status from terminal state: " + currentStatus);
+        }
+
+        if (currentStatus == OrderStatus.PENDING) {
+            if (newStatus != OrderStatus.CONFIRMED && newStatus != OrderStatus.CANCELLED) {
+                throw new IllegalArgumentException("Cannot transition from PENDING to " + newStatus);
+            }
+        } else if (currentStatus == OrderStatus.CONFIRMED) {
+            if (newStatus != OrderStatus.COMPLETED && newStatus != OrderStatus.CANCELLED) {
+                throw new IllegalArgumentException("Cannot transition from CONFIRMED to " + newStatus);
             }
         }
 
+        order.setOrderStatus(newStatus);
+        orderDetailsRepository.save(order);
+
+        // If cancelling, restore inventory stock level
+        if (newStatus == OrderStatus.CANCELLED) {
+            List<OrderItem> items = order.getOrderItems();
+            if (items != null) {
+                for (OrderItem item : items) {
+                    Inventory inventory = inventoryRepository.findByProductIdAndStoreId(
+                            item.getProduct().getId(), order.getStore().getId());
+                    if (inventory != null) {
+                        inventory.setStockLevel(inventory.getStockLevel() + item.getQuantity());
+                        inventoryRepository.save(inventory);
+                    }
+                }
+            }
+        }
+    }
+
+    public OrderDetails getOrderById(Long orderId) {
+        return orderDetailsRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Order not found with ID: " + orderId));
     }
 }

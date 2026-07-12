@@ -29,11 +29,15 @@ public class OrderDetails {
     @JsonBackReference
     private List<OrderItem> orderItems;
 
+    @Enumerated(EnumType.STRING)
+    private OrderStatus orderStatus = OrderStatus.PENDING;
+
     public OrderDetails(Customer customer, Store store, double totalPrice, LocalDateTime date) {
         this.customer = customer;
         this.store = store;
         this.totalPrice = totalPrice;
         this.date = date;
+        this.orderStatus = OrderStatus.PENDING;
     }
 
     public long getId() {
@@ -85,5 +89,13 @@ public class OrderDetails {
     }
 
     public OrderDetails() {
+    }
+
+    public OrderStatus getOrderStatus() {
+        return orderStatus;
+    }
+
+    public void setOrderStatus(OrderStatus orderStatus) {
+        this.orderStatus = orderStatus;
     }
 }

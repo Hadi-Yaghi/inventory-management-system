@@ -57,6 +57,16 @@ CREATE TABLE IF NOT EXISTS stock_transfer (
     CONSTRAINT fk_stock_transfer_to_store FOREIGN KEY (to_store_id) REFERENCES store(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS return_request (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    order_item_id BIGINT NOT NULL,
+    quantity INT NOT NULL,
+    reason VARCHAR(255) NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    requested_at DATETIME NOT NULL,
+    CONSTRAINT fk_return_request_order_item FOREIGN KEY (order_item_id) REFERENCES order_item(id) ON DELETE CASCADE
+);
+
 -- 3. Alter existing tables to add columns and foreign key constraints
 ALTER TABLE product ADD COLUMN IF NOT EXISTS category_id BIGINT NULL;
 ALTER TABLE product ADD COLUMN IF NOT EXISTS supplier_id BIGINT NULL;
@@ -65,6 +75,7 @@ ALTER TABLE product ADD CONSTRAINT fk_product_category FOREIGN KEY (category_id)
 ALTER TABLE product ADD CONSTRAINT fk_product_supplier FOREIGN KEY (supplier_id) REFERENCES supplier(id) ON DELETE SET NULL;
 
 ALTER TABLE inventory ADD COLUMN IF NOT EXISTS low_stock_threshold INT DEFAULT 10;
+ALTER TABLE order_details ADD COLUMN IF NOT EXISTS order_status VARCHAR(50) NOT NULL DEFAULT 'PENDING';
 
 -- 4. Insert Sample Data for new independent tables (Categories, Suppliers, and Users)
 -- (Using INSERT IGNORE to prevent duplicate errors on re-runs)

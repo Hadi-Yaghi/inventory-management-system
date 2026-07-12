@@ -6,10 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,6 +28,9 @@ public class ReviewController {
 
     @Autowired
     CustomerRepository customerRepository;
+
+    @Autowired
+    com.project.code.Repo.OrderItemRepository orderItemRepository;
 
     @GetMapping("/{storeId}/{productId}")
     @Operation(summary = "Get reviews for a product in a store with pagination", description = "Retrieve a list of reviews for a product in a store, including customer names, using pagination.")
@@ -82,4 +82,33 @@ public class ReviewController {
     }
 
 
+    @PostMapping
+    @Operation(summary = "Submit a review", description = "Submit a product review. The system verifies if the customer has made a purchase of the product at the store to mark it as verified.")
+    public Review addReview(@jakarta.validation.Valid @RequestBody Review review) {
+        boolean isVerified = orderItemRepository.existsByCustomerAndProductAndStore(
+                review.getCustomerId(), review.getProductId(), review.getStoreId());
+        review.setVerifiedPurchase(isVerified);
+        return reviewRepository.save(review);
+    }
+
+    @PostMapping("/{id}/like")
+    @Operation(summary = "Like a review", description = "Increment the likes count for the specified review.")
+    public Review likeReview(@PathVariable String id) {
+        Review review = reviewRepository.findById(id)
+                .orElseThrow(() -> new com.project.code.exception.NotFoundException("Review not found with ID: " + id));
+        review.setLikes(review.getLikes() + 1);
+        return reviewRepository.save(review);
+    }
+
+    @PostMapping("/{id}/reply")
+    @Operation(summary = "Reply to a review", description = "Add a reply to the specified review.")
+    public Review replyToReview(@PathVariable String id, @RequestParam String authorId, @RequestParam String text) {
+        Review review = reviewRepository.findById(id)
+                .orElseThrow(() -> new com.project.code.exception.NotFoundException("Review not found with ID: " + id));
+        if (review.getReplies() == null) {
+            review.setReplies(new ArrayList<>());
+        }
+        review.getReplies().add(new com.project.code.Model.ReviewReply(authorId, text));
+        return reviewRepository.save(review);
+    }
 }

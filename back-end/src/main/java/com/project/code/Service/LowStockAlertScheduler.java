@@ -18,17 +18,26 @@ public class LowStockAlertScheduler {
     @Autowired
     private InventoryRepository inventoryRepository;
 
+    @Autowired
+    private EmailService emailService;
+
     // Run every day at midnight
     @Scheduled(cron = "0 0 0 * * ?")
     public void checkLowStock() {
         List<Inventory> lowStockItems = inventoryRepository.findAllLowStock();
         log.warn("DAILY LOW STOCK CHECK: Found {} items below threshold", lowStockItems.size());
-        for (Inventory item : lowStockItems) {
-            log.warn("Store: '{}', Product: '{}', Stock Level: {}, Threshold: {}",
-                    item.getStore().getName(),
-                    item.getProduct().getName(),
-                    item.getStockLevel(),
-                    item.getLowStockThreshold());
+        if (!lowStockItems.isEmpty()) {
+            StringBuilder sb = new StringBuilder();
+            for (Inventory item : lowStockItems) {
+                String line = String.format("Store: '%s', Product: '%s', Stock Level: %d, Threshold: %d",
+                        item.getStore().getName(),
+                        item.getProduct().getName(),
+                        item.getStockLevel(),
+                        item.getLowStockThreshold());
+                log.warn(line);
+                sb.append(line).append("\n");
+            }
+            emailService.sendLowStockAlert("Inventory Management System", sb.toString());
         }
     }
 }
