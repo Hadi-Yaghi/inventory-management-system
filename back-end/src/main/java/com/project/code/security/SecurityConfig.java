@@ -104,7 +104,13 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/reviews").hasAnyRole("ADMIN", "MANAGER", "EMPLOYEE")
                 .requestMatchers(HttpMethod.POST, "/reviews/*/like", "/reviews/*/reply").hasAnyRole("ADMIN", "MANAGER", "EMPLOYEE")
 
-                // 11. Read access everywhere
+                // 11. Admin Activity Logs (ADMIN only)
+                .requestMatchers("/admin/activity-logs/**").hasRole("ADMIN")
+
+                // 12. Analytics Dashboard & Reports (ADMIN, MANAGER)
+                .requestMatchers("/analytics/**").hasAnyRole("ADMIN", "MANAGER")
+
+                // 13. Read access everywhere
                 .requestMatchers(HttpMethod.GET, "/**").hasAnyRole("ADMIN", "MANAGER", "EMPLOYEE")
 
                 // Any other request must be authenticated
