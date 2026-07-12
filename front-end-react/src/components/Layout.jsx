@@ -1,6 +1,6 @@
 import React from 'react';
-import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { Link, Outlet, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/auth-context';
 import { LayoutDashboard, Package, Users, LogOut, Tags, Truck, FileText, Activity } from 'lucide-react';
 
 const Layout = () => {

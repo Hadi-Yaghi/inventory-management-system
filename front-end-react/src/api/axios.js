@@ -1,18 +1,21 @@
 import axios from 'axios';
 
-// Base API instance
 const api = axios.create({
-  baseURL: 'http://localhost:8080', // Replace with dynamic env variable if needed
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081',
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// We keep the access token in memory
-let accessToken = null;
+let accessToken = localStorage.getItem('accessToken');
 
 export const setAccessToken = (token) => {
   accessToken = token;
+  if (token) {
+    localStorage.setItem('accessToken', token);
+  } else {
+    localStorage.removeItem('accessToken');
+  }
 };
 
 export const getAccessToken = () => {
@@ -22,8 +25,9 @@ export const getAccessToken = () => {
 // Request interceptor to attach token
 api.interceptors.request.use(
   (config) => {
-    if (accessToken) {
-      config.headers['Authorization'] = `Bearer ${accessToken}`;
+    const token = accessToken || localStorage.getItem('accessToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },

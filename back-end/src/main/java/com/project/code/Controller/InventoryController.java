@@ -40,6 +40,15 @@ public class InventoryController {
     @Autowired
     private ServiceClass serviceClass;
 
+    @GetMapping
+    @Operation(summary = "Get all inventory records", description = "Retrieve inventory records across all stores.")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved inventory records")
+    public List<Map<String, Object>> getAllInventory() {
+        return inventoryRepository.findAll().stream()
+                .map(this::toInventoryResponse)
+                .toList();
+    }
+
     @PutMapping
     @Operation(summary = "Update inventory record", description = "Update stock level and associated product details in inventory. Accessible by ADMIN, MANAGER, and EMPLOYEE.")
     @ApiResponse(responseCode = "200", description = "Successfully updated product and inventory")
@@ -182,6 +191,35 @@ public class InventoryController {
     @ApiResponse(responseCode = "200", description = "Successfully retrieved low stock items")
     public List<Inventory> getLowStockItems(@PathVariable Long storeId) {
         return inventoryRepository.findLowStockByStoreId(storeId);
+    }
+
+    private Map<String, Object> toInventoryResponse(Inventory inventory) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", inventory.getId());
+        response.put("stockLevel", inventory.getStockLevel());
+        response.put("quantity", inventory.getStockLevel());
+        response.put("lowStockThreshold", inventory.getLowStockThreshold());
+        response.put("minThreshold", inventory.getLowStockThreshold());
+
+        if (inventory.getProduct() != null) {
+            Map<String, Object> product = new HashMap<>();
+            product.put("id", inventory.getProduct().getId());
+            product.put("name", inventory.getProduct().getName());
+            product.put("sku", inventory.getProduct().getSku());
+            product.put("price", inventory.getProduct().getPrice());
+            product.put("category", inventory.getProduct().getCategory());
+            response.put("product", product);
+        }
+
+        if (inventory.getStore() != null) {
+            Map<String, Object> store = new HashMap<>();
+            store.put("id", inventory.getStore().getId());
+            store.put("name", inventory.getStore().getName());
+            store.put("address", inventory.getStore().getAddress());
+            response.put("store", store);
+        }
+
+        return response;
     }
 
 }

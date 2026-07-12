@@ -1,7 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getOrders } from '../api/orders';
-import { FileText, Plus, Search, Filter } from 'lucide-react';
+import { Plus, Search, Filter } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Orders = () => {

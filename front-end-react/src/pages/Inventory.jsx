@@ -1,7 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getInventory } from '../api/inventory';
-import { Truck, AlertTriangle } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 
 const Inventory = () => {
   const { data: inventory, isLoading, isError } = useQuery({
@@ -47,16 +47,20 @@ const Inventory = () => {
                     </td>
                   </tr>
                 ) : (
-                  inventory?.map((item) => (
+                  inventory?.map((item) => {
+                    const stockLevel = item.stockLevel ?? item.quantity ?? 0;
+                    const threshold = item.lowStockThreshold ?? item.minThreshold ?? 10;
+
+                    return (
                     <tr key={item.id} className="hover:bg-slate-50 transition">
                       <td className="p-4 font-medium text-slate-900">
                         {item.store?.name || 'Main Warehouse'}
                       </td>
                       <td className="p-4 text-slate-600">{item.product?.name}</td>
-                      <td className="p-4 text-slate-900 font-medium">{item.quantity}</td>
-                      <td className="p-4 text-slate-600">{item.minThreshold || 10}</td>
+                      <td className="p-4 text-slate-900 font-medium">{stockLevel}</td>
+                      <td className="p-4 text-slate-600">{threshold}</td>
                       <td className="p-4">
-                        {item.quantity <= (item.minThreshold || 10) ? (
+                        {stockLevel <= threshold ? (
                           <span className="flex items-center text-red-600 font-medium text-xs bg-red-50 px-2 py-1 rounded-full w-fit">
                             <AlertTriangle className="h-3 w-3 mr-1" />
                             Low Stock
@@ -68,7 +72,8 @@ const Inventory = () => {
                         )}
                       </td>
                     </tr>
-                  ))
+                    );
+                  })
                 )}
               </tbody>
             </table>

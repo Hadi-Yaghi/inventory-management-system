@@ -14,7 +14,7 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    @Value("${jwt.secret:9a4f2c8d3b7a1e5f9c8b7d6a5e4f3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e}")
+    @Value("${jwt.secret}")
     private String secretKey;
 
     @Value("${jwt.access-expiration:3600000}")
@@ -24,6 +24,9 @@ public class JwtService {
     private long refreshTokenExpiration;
 
     private SecretKey getSigningKey() {
+        if (secretKey == null || secretKey.isBlank()) {
+            throw new IllegalStateException("JWT_SECRET must be set to a base64-encoded HMAC secret.");
+        }
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }

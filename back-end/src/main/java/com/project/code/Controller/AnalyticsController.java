@@ -38,6 +38,34 @@ public class AnalyticsController {
     // DASHBOARD ANALYTICS
     // ═══════════════════════════════════════════════════════════════════════
 
+    @GetMapping
+    @Operation(summary = "Get dashboard summary", description = "Returns top-level dashboard metrics.")
+    public ResponseEntity<Map<String, Object>> getDashboardSummary() {
+        Double revenue = orderDetailsRepository.getTotalRevenue(
+                LocalDate.of(2000, 1, 1).atStartOfDay(),
+                LocalDateTime.now());
+        List<Inventory> lowStock = inventoryRepository.findAllLowStock();
+        List<Object[]> counts = orderDetailsRepository.getOrderCountsByStatus();
+
+        long activeOrders = 0;
+        Map<String, Object> ordersByStatus = new LinkedHashMap<>();
+        for (Object[] row : counts) {
+            String status = row[0] != null ? row[0].toString() : "UNKNOWN";
+            long count = ((Number) row[1]).longValue();
+            ordersByStatus.put(status, count);
+            if (!"COMPLETED".equals(status) && !"CANCELLED".equals(status)) {
+                activeOrders += count;
+            }
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("totalRevenue", revenue != null ? revenue : 0.0);
+        result.put("activeOrders", activeOrders);
+        result.put("lowStockCount", lowStock.size());
+        result.put("ordersByStatus", ordersByStatus);
+        return ResponseEntity.ok(result);
+    }
+
     @GetMapping("/revenue")
     @Operation(summary = "Get total revenue", description = "Returns total revenue over a date range. Excludes cancelled orders.")
     public ResponseEntity<Map<String, Object>> getTotalRevenue(
