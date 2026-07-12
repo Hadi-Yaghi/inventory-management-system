@@ -12,7 +12,17 @@ window.fetch = function (url, options = {}) {
             options.headers["Authorization"] = `Bearer ${token}`;
         }
     }
-    return originalFetch(url, options);
+    return originalFetch(url, options).then(response => {
+        if (response.status === 401 && !url.includes('/auth/login')) {
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
+            const overlay = document.getElementById('loginOverlay');
+            if (overlay) {
+                overlay.style.display = 'flex';
+            }
+        }
+        return response;
+    });
 };
 
 let productPage = 0;
@@ -1437,5 +1447,32 @@ async function cancelTransfer(id) {
         }
     } catch (e) {
         alert('Error: ' + e.message);
+    }
+}
+
+async function handleOverlayLogin(event) {
+    event.preventDefault();
+    const username = document.getElementById('loginUsername').value;
+    const password = document.getElementById('loginPassword').value;
+
+    try {
+        const res = await fetch(`${apiURL}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+        if (res.ok) {
+            const data = await res.json();
+            localStorage.setItem('accessToken', data.accessToken);
+            localStorage.setItem('refreshToken', data.refreshToken);
+            localStorage.setItem('userRole', data.role);
+            document.getElementById('loginOverlay').style.display = 'none';
+            await loadCategoriesAndSuppliers();
+            viewProductList();
+        } else {
+            alert('Invalid credentials, please try again.');
+        }
+    } catch (e) {
+        alert('Connection error: ' + e.message);
     }
 }
