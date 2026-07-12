@@ -77,6 +77,16 @@ ALTER TABLE product ADD CONSTRAINT fk_product_supplier FOREIGN KEY (supplier_id)
 ALTER TABLE inventory ADD COLUMN IF NOT EXISTS low_stock_threshold INT DEFAULT 10;
 ALTER TABLE order_details ADD COLUMN IF NOT EXISTS order_status VARCHAR(50) NOT NULL DEFAULT 'PENDING';
 
+CREATE TABLE IF NOT EXISTS activity_log (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id VARCHAR(255),
+    action VARCHAR(50),
+    entity_type VARCHAR(100),
+    entity_id VARCHAR(255),
+    details TEXT,
+    timestamp DATETIME NOT NULL
+);
+
 -- 4. Insert Sample Data for new independent tables (Categories, Suppliers, and Users)
 -- (Using INSERT IGNORE to prevent duplicate errors on re-runs)
 
