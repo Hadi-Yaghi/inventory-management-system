@@ -26,7 +26,13 @@ public class Inventory {
 
     private Integer stockLevel;
 
+    private Integer lowStockThreshold = 10;
+
     public Inventory() {}
+
+    public Integer getLowStockThreshold() { return lowStockThreshold; }
+
+    public void setLowStockThreshold(Integer lowStockThreshold) { this.lowStockThreshold = lowStockThreshold; }
 
     public Inventory(Product product, Store store, Integer stockLevel) {
         this.product = product;

@@ -11,13 +11,23 @@ public class WebConfig implements WebMvcConfigurer {
     @Value("${app.frontend.url:http://localhost:5500,http://127.0.0.1:5500}")
     private String frontendUrl;
 
+    @Value("${app.upload.dir:uploads}")
+    private String uploadDir;
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         String[] allowedOrigins = frontendUrl.split(",");
         // Allow CORS for all endpoints matching allowed origins
         registry.addMapping("/**")
                 .allowedOrigins(allowedOrigins)  // Add your frontend URLs here
-                .allowedMethods("GET", "POST", "PUT", "DELETE")  // Specify allowed methods
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")  // Specify allowed methods
                 .allowedHeaders("*");  // You can restrict headers if needed
+    }
+
+    @Override
+    public void addResourceHandlers(org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry registry) {
+        java.nio.file.Path path = java.nio.file.Paths.get(uploadDir).toAbsolutePath().normalize();
+        registry.addResourceHandler("/uploads/**")
+                .addResourceLocations("file:" + path.toString() + "/");
     }
 }

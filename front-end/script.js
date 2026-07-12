@@ -388,6 +388,17 @@ async function createData(products, storeId) {
 
         const row = document.createElement('tr');
 
+        const imageTd = document.createElement('td');
+        if (product.images && product.images.length > 0) {
+            const img = document.createElement('img');
+            img.src = product.images[0].imageUrl;
+            img.style.maxHeight = '40px';
+            img.style.borderRadius = '4px';
+            imageTd.appendChild(img);
+        } else {
+            imageTd.textContent = 'No Image';
+        }
+
         const prodId = document.createElement('td');
         prodId.classList.add('expandable');
         prodId.textContent = product.id;
@@ -398,7 +409,11 @@ async function createData(products, storeId) {
 
         const category = document.createElement('td');
         category.classList.add('expandable');
-        category.textContent = product.category;
+        category.textContent = product.category ? product.category.name : '';
+
+        const supplier = document.createElement('td');
+        supplier.classList.add('expandable');
+        supplier.textContent = product.supplier ? product.supplier.name : '';
 
         const price = document.createElement('td');
         price.classList.add('expandable');
@@ -410,7 +425,7 @@ async function createData(products, storeId) {
 
         const stockLevel = document.createElement('td');
         stockLevel.classList.add('expandable');
-        stockLevel.textContent = product.inventory[0].stockLevel;
+        stockLevel.textContent = product.inventory && product.inventory[0] ? product.inventory[0].stockLevel : 0;
 
         const reviewCol = document.createElement('td');
         const reviewBtn = document.createElement('button');
@@ -421,18 +436,15 @@ async function createData(products, storeId) {
         })
         reviewCol.appendChild(reviewBtn);
 
-
-
         const buttoncolumn = document.createElement('td');
         const button = document.createElement('button')
         button.classList.add('btn', 'btn-warning');
         button.textContent = 'Edit';
         button.addEventListener('click', () => {
-            window.location = `edit-product.html?productId=${product.id}&storeId=${storeId}&stockLevel=${product.inventory[0].stockLevel}`;
-
+            const level = product.inventory && product.inventory[0] ? product.inventory[0].stockLevel : 0;
+            window.location = `edit-product.html?productId=${product.id}&storeId=${storeId}&stockLevel=${level}`;
         });
         buttoncolumn.appendChild(button);
-
 
         const buttonTable2 = document.createElement('td');
         const delbutton = document.createElement('button')
@@ -444,10 +456,11 @@ async function createData(products, storeId) {
         });
         buttonTable2.appendChild(delbutton);
 
-
+        row.appendChild(imageTd);
         row.appendChild(prodId);
         row.appendChild(name);
         row.appendChild(category);
+        row.appendChild(supplier);
         row.appendChild(price);
         row.appendChild(sku);
         row.appendChild(stockLevel);
@@ -625,50 +638,27 @@ function addProductToInventory(event) {
 
 
 function viewProductList() {
-    const allProducts = document.getElementById('allProducts');
-    if (allProducts) {
-        allProducts.innerHTML = '<tr><td colspan="7" style="text-align:center;">Loading parent products...</td></tr>';
-    }
-
-    let url = `${apiURL}/product?page=${productPage}&size=${productSize}&sort=id,asc`;
-    fetch(url, {
-        method: "GET",
-        headers: { "content-type": "application/json" },
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Server returned status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.products && data.products.length > 0) {
-                showProductsInTable(data.products);
-                renderProductPagination(data.totalPages);
-            }
-            else {
-                if (allProducts) {
-                    allProducts.innerHTML = '<tr><td colspan="7" style="text-align:center;">No parent products found.</td></tr>';
-                }
-                resetForm();
-                renderProductPagination(0);
-                return;
-            }
-        })
-        .catch(error => {
-            console.error('Error loading parent products:', error);
-            if (allProducts) {
-                allProducts.innerHTML = `<tr><td colspan="7" style="text-align:center; color:red; font-weight:bold;">Error loading products: ${error.message}</td></tr>`;
-            }
-        });
+    filterParentProduct();
 }
 
 function showProductsInTable(products) {
-    allProducts = document.getElementById('allProducts')
+    const allProducts = document.getElementById('allProducts');
+    if (!allProducts) return;
     allProducts.innerHTML = "";
     products.forEach(product => {
 
         const row = document.createElement('tr');
+
+        const imageTd = document.createElement('td');
+        if (product.images && product.images.length > 0) {
+            const img = document.createElement('img');
+            img.src = product.images[0].imageUrl;
+            img.style.maxHeight = '40px';
+            img.style.borderRadius = '4px';
+            imageTd.appendChild(img);
+        } else {
+            imageTd.textContent = 'No Image';
+        }
 
         const prodId = document.createElement('td');
         prodId.classList.add('expandable');
@@ -680,7 +670,11 @@ function showProductsInTable(products) {
 
         const category = document.createElement('td');
         category.classList.add('expandable');
-        category.textContent = product.category;
+        category.textContent = product.category ? product.category.name : '';
+
+        const supplier = document.createElement('td');
+        supplier.classList.add('expandable');
+        supplier.textContent = product.supplier ? product.supplier.name : '';
 
         const price = document.createElement('td');
         price.classList.add('expandable');
@@ -690,7 +684,6 @@ function showProductsInTable(products) {
         sku.classList.add('expandable');
         sku.textContent = product.sku;
 
-
         const buttonTable = document.createElement('td');
         const button = document.createElement('button')
         button.classList.add('btn', 'btn-warning');
@@ -698,7 +691,6 @@ function showProductsInTable(products) {
         button.textContent = 'Edit';
         button.addEventListener('click', function () {
             window.location = `edit-parent-product.html?productId=${this.value}`
-
         });
         buttonTable.appendChild(button);
 
@@ -712,9 +704,11 @@ function showProductsInTable(products) {
         });
         buttonTable2.appendChild(delbutton);
 
+        row.appendChild(imageTd);
         row.appendChild(prodId);
         row.appendChild(name);
         row.appendChild(category);
+        row.appendChild(supplier);
         row.appendChild(price);
         row.appendChild(sku);
         row.appendChild(buttonTable);
@@ -799,37 +793,73 @@ function removeFromInventory(id) {
 
 
 async function filterParentProduct() {
-    category = document.getElementById('pcategory').value;
-    productName = document.getElementById('ProductsearchBar').value;
+    let skuOrName = document.getElementById('ProductsearchBar').value.trim();
+    let categorySelect = document.getElementById('pcategory').value;
+    let minPrice = document.getElementById('filterMinPrice') ? document.getElementById('filterMinPrice').value : '';
+    let maxPrice = document.getElementById('filterMaxPrice') ? document.getElementById('filterMaxPrice').value : '';
+    let storeId = document.getElementById('filterStoreId') ? document.getElementById('filterStoreId').value : '';
+    let minRating = document.getElementById('filterMinRating') ? document.getElementById('filterMinRating').value : '';
 
-    if (category.trim() == 'Allcategory' && productName.trim().length == 0) {
-        viewProductList();
-        return;
+    let params = new URLSearchParams();
+    if (skuOrName) {
+        params.append('sku', skuOrName);
     }
-    else if(category.trim() == 'Allcategory')
-    {
-        category=null;
+    if (categorySelect && categorySelect !== 'Allcategory') {
+        params.append('categoryId', categorySelect);
     }
-    else if(productName.trim().length == 0)
-    {
-        productName=null;
+    if (minPrice) {
+        params.append('minPrice', minPrice);
+    }
+    if (maxPrice) {
+        params.append('maxPrice', maxPrice);
+    }
+    if (storeId) {
+        params.append('storeId', storeId);
+    }
+    if (minRating) {
+        params.append('minRating', minRating);
+    }
+    params.append('page', productPage);
+    params.append('size', productSize);
+    params.append('sort', 'id,asc');
+
+    let url = `${apiURL}/product/search?${params.toString()}`;
+    const allProducts = document.getElementById('allProducts');
+    if (allProducts) {
+        allProducts.innerHTML = '<tr><td colspan="9" style="text-align:center;">Searching parent products...</td></tr>';
     }
 
-    let url = `${apiURL}/product/category/${productName}/${category}`;
+    const token = localStorage.getItem('accessToken');
+    const headers = { "content-type": "application/json" };
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
     fetch(url, {
         method: "GET",
-        headers: { "content-type": "application/json" },
+        headers: headers,
     })
         .then(response => {
+            if (!response.ok) throw new Error(`Status: ${response.status}`);
             return response.json();
         })
         .then(data => {
-
-            showProductsInTable(data.products);
+            if (data.products && data.products.length > 0) {
+                showProductsInTable(data.products);
+                renderProductPagination(data.totalPages);
+            } else {
+                if (allProducts) {
+                    allProducts.innerHTML = '<tr><td colspan="9" style="text-align:center;">No matching products found.</td></tr>';
+                }
+                renderProductPagination(0);
+            }
         })
         .catch(error => {
-            alert(error);
-        })
+            console.error(error);
+            if (allProducts) {
+                allProducts.innerHTML = `<tr><td colspan="9" style="text-align:center; color:red;">Error loading products: ${error.message}</td></tr>`;
+            }
+        });
 }
 
 
@@ -861,9 +891,26 @@ function getProductByid(productId) {
 
 function setParentProduct(product) {
     document.getElementById('pproductName').value = product.name;
-    document.getElementById('pcategory').value = product.category;
+    if (product.category && document.getElementById('pcategory')) {
+        document.getElementById('pcategory').value = product.category.id;
+    }
+    if (product.supplier && document.getElementById('psupplier')) {
+        document.getElementById('psupplier').value = product.supplier.id;
+    }
     document.getElementById('pproductPrice').value = product.price;
     document.getElementById('pSKU').value = product.sku;
+
+    if (product.images && product.images.length > 0) {
+        const imageUrl = product.images[0].imageUrl;
+        if (document.getElementById('parentImageUrl')) {
+            document.getElementById('parentImageUrl').value = imageUrl;
+        }
+        const imgPreview = document.getElementById('imagePreview');
+        if (imgPreview) {
+            imgPreview.src = imageUrl;
+            imgPreview.style.display = 'block';
+        }
+    }
 }
 
 
@@ -871,16 +918,33 @@ function setParentProduct(product) {
 function updateParentProduct(event) {
     event.preventDefault();
 
-    productId = document.getElementById('pproductId').value;
-    productName = document.getElementById('pproductName').value;
-    category = document.getElementById('pcategory').value;
-    price = document.getElementById('pproductPrice').value;
-    sku = document.getElementById('pSKU').value;
+    let productId = document.getElementById('pproductId').value;
+    let productName = document.getElementById('pproductName').value;
+    let categoryId = document.getElementById('pcategory').value;
+    let supplierId = document.getElementById('psupplier').value;
+    let price = document.getElementById('pproductPrice').value;
+    let sku = document.getElementById('pSKU').value;
+    let imageUrl = document.getElementById('parentImageUrl') ? document.getElementById('parentImageUrl').value : '';
+
+    let imagesList = imageUrl ? [{ imageUrl: imageUrl }] : [];
+
+    let data = {
+        id: parseInt(productId),
+        name: productName,
+        category: { id: parseInt(categoryId) },
+        supplier: supplierId ? { id: parseInt(supplierId) } : null,
+        price: parseFloat(price),
+        sku: sku,
+        images: imagesList
+    };
+
     let url = `${apiURL}/product`
-    data = { id: productId, name: productName, category: category, price: price, sku: sku };
     fetch(url, {
         method: "PUT",
-        headers: { "content-type": "application/json" },
+        headers: {
+            "content-type": "application/json",
+            "Authorization": localStorage.getItem('accessToken') ? `Bearer ${localStorage.getItem('accessToken')}` : ""
+        },
         body: JSON.stringify(data)
     })
         .then(response => {
@@ -897,16 +961,30 @@ function updateParentProduct(event) {
 function addParentProduct(event) {
     event.preventDefault();
     let productName = document.getElementById('parentproductName').value;
-    let category = document.getElementById('parentcategory').value;
+    let categoryId = document.getElementById('parentcategory').value;
+    let supplierId = document.getElementById('parentsupplier').value;
     let productPrice = document.getElementById('parentproductPrice').value;
     let SKU = document.getElementById('parentSKU').value;
+    let imageUrl = document.getElementById('parentImageUrl') ? document.getElementById('parentImageUrl').value : '';
 
-    let data = { name: productName, category: category, price: productPrice, sku: SKU };
+    let imagesList = imageUrl ? [{ imageUrl: imageUrl }] : [];
+
+    let data = {
+        name: productName,
+        category: { id: parseInt(categoryId) },
+        supplier: supplierId ? { id: parseInt(supplierId) } : null,
+        price: parseFloat(productPrice),
+        sku: SKU,
+        images: imagesList
+    };
 
     let url = `${apiURL}/product`
     fetch(url, {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: {
+            "content-type": "application/json",
+            "Authorization": localStorage.getItem('accessToken') ? `Bearer ${localStorage.getItem('accessToken')}` : ""
+        },
         body: JSON.stringify(data)
     })
         .then(response => {
@@ -1099,4 +1177,265 @@ function renderInventoryPagination(totalPages, storeId) {
     controls.appendChild(prevBtn);
     controls.appendChild(info);
     controls.appendChild(nextBtn);
+}
+
+// Dynamics loading dropdown values
+async function loadCategoriesAndSuppliers() {
+    let headers = {};
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    try {
+        const catRes = await fetch(`${apiURL}/category`, { headers });
+        if (catRes.ok) {
+            const categories = await catRes.json();
+            const indexCatSelect = document.getElementById('pcategory');
+            if (indexCatSelect) {
+                indexCatSelect.innerHTML = '<option value="Allcategory" selected>All category</option>';
+                categories.forEach(cat => {
+                    const opt = document.createElement('option');
+                    opt.value = cat.id;
+                    opt.textContent = cat.name;
+                    indexCatSelect.appendChild(opt);
+                });
+            }
+            const indexInvCatSelect = document.getElementById('category');
+            if (indexInvCatSelect) {
+                indexInvCatSelect.innerHTML = '<option value="Allcategory" selected>All category</option>';
+                categories.forEach(cat => {
+                    const opt = document.createElement('option');
+                    opt.value = cat.name;
+                    opt.textContent = cat.name;
+                    indexInvCatSelect.appendChild(opt);
+                });
+            }
+            const addCatSelect = document.getElementById('parentcategory');
+            if (addCatSelect) {
+                addCatSelect.innerHTML = '<option value="" selected disabled>Select category</option>';
+                categories.forEach(cat => {
+                    const opt = document.createElement('option');
+                    opt.value = cat.id;
+                    opt.textContent = cat.name;
+                    addCatSelect.appendChild(opt);
+                });
+            }
+            const editCatSelect = document.getElementById('pcategory');
+            if (editCatSelect && editCatSelect.id === 'pcategory') {
+                editCatSelect.innerHTML = '<option value="" selected disabled>Select category</option>';
+                categories.forEach(cat => {
+                    const opt = document.createElement('option');
+                    opt.value = cat.id;
+                    opt.textContent = cat.name;
+                    editCatSelect.appendChild(opt);
+                });
+            }
+        }
+    } catch (e) {
+        console.error("Error loading categories:", e);
+    }
+
+    try {
+        const supRes = await fetch(`${apiURL}/supplier`, { headers });
+        if (supRes.ok) {
+            const suppliers = await supRes.json();
+            const addSupSelect = document.getElementById('parentsupplier');
+            if (addSupSelect) {
+                addSupSelect.innerHTML = '<option value="" selected disabled>Select supplier</option>';
+                suppliers.forEach(sup => {
+                    const opt = document.createElement('option');
+                    opt.value = sup.id;
+                    opt.textContent = sup.name;
+                    addSupSelect.appendChild(opt);
+                });
+            }
+            const editSupSelect = document.getElementById('psupplier');
+            if (editSupSelect) {
+                editSupSelect.innerHTML = '<option value="" selected disabled>Select supplier</option>';
+                suppliers.forEach(sup => {
+                    const opt = document.createElement('option');
+                    opt.value = sup.id;
+                    opt.textContent = sup.name;
+                    editSupSelect.appendChild(opt);
+                });
+            }
+        }
+    } catch (e) {
+        console.error("Error loading suppliers:", e);
+    }
+}
+
+// Product Image file upload
+async function uploadProductImage() {
+    const fileInput = document.getElementById('productImage');
+    if (!fileInput || fileInput.files.length === 0) return;
+
+    const file = fileInput.files[0];
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const token = localStorage.getItem('accessToken');
+    const headers = {};
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    try {
+        const response = await fetch(`${apiURL}/uploads`, {
+            method: 'POST',
+            headers: headers,
+            body: formData
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            document.getElementById('parentImageUrl').value = result.url;
+            const imgPreview = document.getElementById('imagePreview');
+            imgPreview.src = result.url;
+            imgPreview.style.display = 'block';
+        } else {
+            const err = await response.json();
+            alert('Upload failed: ' + (err.message || response.statusText));
+        }
+    } catch (e) {
+        alert('Error uploading image: ' + e.message);
+    }
+}
+
+// Stock Transfer operations
+async function initiateTransfer(event) {
+    event.preventDefault();
+    const productId = document.getElementById('transProductId').value;
+    const fromStoreId = document.getElementById('transFromStoreId').value;
+    const toStoreId = document.getElementById('transToStoreId').value;
+    const quantity = document.getElementById('transQuantity').value;
+
+    const token = localStorage.getItem('accessToken');
+    const headers = {};
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const url = `${apiURL}/transfers/initiate?productId=${productId}&fromStoreId=${fromStoreId}&toStoreId=${toStoreId}&quantity=${quantity}`;
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: headers
+        });
+
+        if (response.ok) {
+            alert('Stock transfer initiated successfully!');
+            document.getElementById('transferForm').reset();
+            loadStockTransfers();
+        } else {
+            const err = await response.json();
+            alert('Error initiating transfer: ' + (err.message || response.statusText));
+        }
+    } catch (e) {
+        alert('Error: ' + e.message);
+    }
+}
+
+async function loadStockTransfers() {
+    const logsBody = document.getElementById('transferLogs');
+    if (!logsBody) return;
+
+    logsBody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Loading transfer logs...</td></tr>';
+
+    const token = localStorage.getItem('accessToken');
+    const headers = { "content-type": "application/json" };
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    try {
+        const response = await fetch(`${apiURL}/transfers`, { headers });
+        if (response.ok) {
+            const logs = await response.json();
+            logsBody.innerHTML = '';
+
+            if (logs.length === 0) {
+                logsBody.innerHTML = '<tr><td colspan="8" style="text-align:center;">No stock transfers found.</td></tr>';
+                return;
+            }
+
+            logs.forEach(log => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${log.id}</td>
+                    <td>${log.productId}</td>
+                    <td>${log.fromStoreId}</td>
+                    <td>${log.toStoreId}</td>
+                    <td>${log.quantity}</td>
+                    <td><span class="badge ${log.status === 'PENDING' ? 'bg-warning' : log.status === 'COMPLETED' ? 'bg-success' : 'bg-danger'}">${log.status}</span></td>
+                    <td>${new Date(log.requestedAt).toLocaleString()}</td>
+                    <td>
+                        ${log.status === 'PENDING' ? `
+                            <button class="btn btn-sm btn-success" onclick="confirmTransfer(${log.id})">Confirm</button>
+                            <button class="btn btn-sm btn-danger" onclick="cancelTransfer(${log.id})">Cancel</button>
+                        ` : '-'}
+                    </td>
+                `;
+                logsBody.appendChild(tr);
+            });
+        } else {
+            logsBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:red;">Failed to load logs.</td></tr>';
+        }
+    } catch (e) {
+        logsBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:red;">Error: ' + e.message + '</td></tr>';
+    }
+}
+
+async function confirmTransfer(id) {
+    if (!confirm('Are you sure you want to confirm this transfer?')) return;
+    const token = localStorage.getItem('accessToken');
+    const headers = {};
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    try {
+        const response = await fetch(`${apiURL}/transfers/${id}/confirm`, {
+            method: 'POST',
+            headers: headers
+        });
+
+        if (response.ok) {
+            alert('Transfer confirmed successfully!');
+            loadStockTransfers();
+        } else {
+            const err = await response.json();
+            alert('Confirmation failed: ' + (err.message || response.statusText));
+        }
+    } catch (e) {
+        alert('Error: ' + e.message);
+    }
+}
+
+async function cancelTransfer(id) {
+    if (!confirm('Are you sure you want to cancel this transfer?')) return;
+    const token = localStorage.getItem('accessToken');
+    const headers = {};
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    try {
+        const response = await fetch(`${apiURL}/transfers/${id}/cancel`, {
+            method: 'POST',
+            headers: headers
+        });
+
+        if (response.ok) {
+            alert('Transfer cancelled successfully!');
+            loadStockTransfers();
+        } else {
+            const err = await response.json();
+            alert('Cancellation failed: ' + (err.message || response.statusText));
+        }
+    } catch (e) {
+        alert('Error: ' + e.message);
+    }
 }

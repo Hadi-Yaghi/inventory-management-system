@@ -56,6 +56,7 @@ public class SecurityConfig {
                 // Public endpoints
                 .requestMatchers("/auth/login", "/auth/register").permitAll()
                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
+                .requestMatchers("/uploads/**").permitAll()
                 .requestMatchers("/error").permitAll()
 
                 // Roles restrictions:
@@ -78,7 +79,21 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/inventory/**").hasAnyRole("ADMIN", "MANAGER", "EMPLOYEE")
                 .requestMatchers(HttpMethod.PUT, "/inventory/**").hasAnyRole("ADMIN", "MANAGER", "EMPLOYEE")
 
-                // 5. Read access everywhere
+                // 5. Category and Supplier writes (POST/PUT/DELETE) restricted to ADMIN, MANAGER
+                .requestMatchers(HttpMethod.POST, "/category/**", "/supplier/**").hasAnyRole("ADMIN", "MANAGER")
+                .requestMatchers(HttpMethod.PUT, "/category/**", "/supplier/**").hasAnyRole("ADMIN", "MANAGER")
+                .requestMatchers(HttpMethod.DELETE, "/category/**", "/supplier/**").hasAnyRole("ADMIN", "MANAGER")
+
+                // 6. Stock Transfers
+                .requestMatchers(HttpMethod.POST, "/transfers/initiate").hasAnyRole("ADMIN", "MANAGER", "EMPLOYEE")
+                .requestMatchers(HttpMethod.POST, "/transfers/*/confirm").hasAnyRole("ADMIN", "MANAGER")
+                .requestMatchers(HttpMethod.POST, "/transfers/*/cancel").hasAnyRole("ADMIN", "MANAGER")
+                .requestMatchers(HttpMethod.GET, "/transfers/**").hasAnyRole("ADMIN", "MANAGER", "EMPLOYEE")
+
+                // 7. Image file upload mutations restricted to ADMIN, MANAGER
+                .requestMatchers(HttpMethod.POST, "/uploads").hasAnyRole("ADMIN", "MANAGER")
+
+                // 8. Read access everywhere
                 .requestMatchers(HttpMethod.GET, "/**").hasAnyRole("ADMIN", "MANAGER", "EMPLOYEE")
 
                 // Any other request must be authenticated

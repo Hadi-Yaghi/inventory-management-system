@@ -88,3 +88,33 @@ The response format returns metadata alongside the contents:
   "totalItems": 15
 }
 ```
+
+---
+
+## Phase 2: Core Improvements & Dynamic Features
+
+This phase introduces database schema normalization, static file storage, transactional inter-store transfers, scheduling low-stock alerts, and specifications-based search.
+
+### 1. Category & Supplier Management
+- **Category Endpoints:** CRUD at `/category` (reads for all authenticated roles, writes restricted to `ADMIN` and `MANAGER`).
+- **Supplier Endpoints:** CRUD at `/supplier` (reads for all roles, writes restricted to `ADMIN` and `MANAGER`).
+- **Data Migration:** Old string category columns are automatically migrated into the normalization structures upon application startup.
+
+### 2. Product Images
+- **Upload Endpoint:** `POST /uploads` (multipart file upload). Returns `{ "url": "..." }` pointing to the statically served upload folder.
+- Stored under a configurable local uploads directory, which can be modified via `app.upload.dir` in properties.
+
+### 3. Stock Transfers
+- **Initiate:** `POST /transfers/initiate?productId={id}&fromStoreId={id}&toStoreId={id}&quantity={qty}` (stores source stock level validation).
+- **Confirm Receipt:** `POST /transfers/{id}/confirm` (managers increment target inventory and mark status `COMPLETED`).
+- **Cancel:** `POST /transfers/{id}/cancel` (managers cancel PENDING logs and return quantity back to source store).
+- All transfer operations are wrapped in `@Transactional`.
+
+### 4. Low Stock Alerts
+- **Configure Threshold:** Define per-inventory `lowStockThreshold` values (default 10).
+- **Retrieval:** `GET /inventory/low-stock/{storeId}` returns items below threshold for a store.
+- **Scheduled Alerts:** Daily checks at midnight log low-stock items via `@Scheduled` alerts.
+
+### 5. Advanced Search & Filtering
+- **Endpoint:** `GET /product/search`
+- **Supported Parameters:** `sku` (partial SKU match), `categoryId`, `minPrice`, `maxPrice`, `storeId` (availablity check), and `minRating` (calculates review averages dynamically from MongoDB). Supports full pagination & sorting.

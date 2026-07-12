@@ -42,5 +42,9 @@ public interface InventoryRepository extends JpaRepository<Inventory,Long> {
     @Transactional
     public void deleteByProductId(Long productId);
 
+    @org.springframework.data.jpa.repository.Query("SELECT i FROM Inventory i WHERE i.store.id = :storeId AND i.stockLevel <= i.lowStockThreshold")
+    public List<Inventory> findLowStockByStoreId(Long storeId);
 
+    @org.springframework.data.jpa.repository.Query("SELECT i FROM Inventory i WHERE i.stockLevel <= i.lowStockThreshold")
+    public List<Inventory> findAllLowStock();
 }

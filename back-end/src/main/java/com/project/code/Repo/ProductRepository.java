@@ -7,15 +7,17 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import com.project.code.Model.Product;
 
 @Repository
-public interface ProductRepository extends JpaRepository<Product, Long> {
+public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
 
 
 
     List<Product> findAll();
 
+    @Query("SELECT p FROM Product p WHERE p.category.name = :category")
     List<Product> findByCategory(String category);
 
     List<Product> findByPriceBetween(Double minPrice, Double maxPrice);
@@ -29,10 +31,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("SELECT i.product FROM Inventory i WHERE i.store.id = :storeId AND LOWER(i.product.name) LIKE LOWER(CONCAT('%', :pname, '%'))")
     List<Product> findByNameLike(long storeId,String pname);
 
-    @Query("SELECT i.product FROM Inventory i WHERE i.store.id = :storeId AND LOWER(i.product.name) LIKE LOWER(CONCAT('%', :pname, '%')) AND i.product.category = :category")
+    @Query("SELECT i.product FROM Inventory i WHERE i.store.id = :storeId AND LOWER(i.product.name) LIKE LOWER(CONCAT('%', :pname, '%')) AND i.product.category.name = :category")
     List<Product> findByNameAndCategory(long storeId, String pname,String category);
 
-    @Query("SELECT i.product FROM Inventory i WHERE i.store.id = :storeId AND i.product.category = :category")
+    @Query("SELECT i.product FROM Inventory i WHERE i.store.id = :storeId AND i.product.category.name = :category")
     List<Product> findByCategoryAndStoreId(long storeId,String category);
 
 
@@ -43,10 +45,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Page<Product> findProductsByStoreId(Long storeId, Pageable pageable);
 
 
-    @Query("SELECT i.product FROM Inventory i WHERE i.product.category = :category and i.store.id = :storeId")
+    @Query("SELECT i.product FROM Inventory i WHERE i.product.category.name = :category and i.store.id = :storeId")
     List<Product> findProductByCategory(String category, long storeId);
 
 
-    @Query("SELECT i FROM Product i WHERE LOWER(i.name) LIKE LOWER(CONCAT('%', :pname, '%')) AND i.category = :category")
+    @Query("SELECT i FROM Product i WHERE LOWER(i.name) LIKE LOWER(CONCAT('%', :pname, '%')) AND i.category.name = :category")
     List<Product> findProductBySubNameAndCategory(String pname, String category);
 }

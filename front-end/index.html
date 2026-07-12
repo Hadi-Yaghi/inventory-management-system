@@ -38,6 +38,9 @@
             <li class="nav-item">
                 <a class="nav-link" id="navBar4" data-bs-toggle="pill" href="#PlaceOrder">Place Order</a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" id="navBar5" data-bs-toggle="pill" href="#StockTransfers" onclick="loadStockTransfers()">Stock Transfers</a>
+            </li>
         </ul>
     </div>
     <div class="tab-content">
@@ -79,9 +82,11 @@
                 <table class="table table-hover styled-table">
                     <thead>
                         <tr>
+                            <th scope="col">Image</th>
                             <th scope="col">ProductId</th>
                             <th scope="col">Product Name</th>
                             <th scope="col">Category</th>
+                            <th scope="col">Supplier</th>
                             <th scope="col">Price</th>
                             <th scope="col">SKU</th>
                             <th scope="col">Stock Level</th>
@@ -106,18 +111,34 @@
                             style="background-color: rgb(125, 231, 125);color: black;">
                     </div>
                     <div class="col">
-                        <input type="text" name="searchBar" id="ProductsearchBar" placeholder="Type Here">
+                        <input type="text" name="searchBar" id="ProductsearchBar" placeholder="SKU/Name search" onkeyup="filterParentProduct()">
                         <input type="submit" id="ProductSearchButton" value="Search" onclick="filterParentProduct()">
                     </div>
                     <div class="col">
                         <select name="category" class="pcategory" id="pcategory" required
                             onchange="filterParentProduct()">
                             <option value="Allcategory" selected>All category</option>
-                            <option value="Mobile">Mobile </option>
-                            <option value="TV and AV">TV and AV</option>
-                            <option value="Home Appliances">Home Appliances</option>
-                            <option value="Laptops and Monitors">Laptops and Monitors</option>
-                            <option value="Accessories">Accessories</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="advancedFilters" class="row mt-2" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <div class="col">
+                        <input type="number" id="filterMinPrice" placeholder="Min Price" class="form-control" style="font-size: 14px;" onkeyup="filterParentProduct()">
+                    </div>
+                    <div class="col">
+                        <input type="number" id="filterMaxPrice" placeholder="Max Price" class="form-control" style="font-size: 14px;" onkeyup="filterParentProduct()">
+                    </div>
+                    <div class="col">
+                        <input type="number" id="filterStoreId" placeholder="Available in Store ID" class="form-control" style="font-size: 14px;" onkeyup="filterParentProduct()">
+                    </div>
+                    <div class="col">
+                        <select id="filterMinRating" class="form-select" style="font-size: 14px;" onchange="filterParentProduct()">
+                            <option value="">Min Rating</option>
+                            <option value="1">1+ Star</option>
+                            <option value="2">2+ Star</option>
+                            <option value="3">3+ Star</option>
+                            <option value="4">4+ Star</option>
+                            <option value="5">5 Star</option>
                         </select>
                     </div>
                 </div>
@@ -126,9 +147,11 @@
                 <table class="table table-hover styled-table">
                     <thead>
                         <tr>
+                            <th scope="col">Image</th>
                             <th scope="col">ProductId</th>
                             <th scope="col">Product Name</th>
                             <th scope="col">Category</th>
+                            <th scope="col">Supplier</th>
                             <th scope="col">Price</th>
                             <th scope="col">SKU</th>
                             <th scope="col">Edit</th>
@@ -253,6 +276,52 @@
                             <input type="submit" value="Place Order">
                         </div>
                 </form>
+            </div>
+        </div>
+        <div class="tab-pane container fade" id="StockTransfers">
+            <div id="form" style="margin-top: 30px; margin-bottom: 30px; padding: 20px;">
+                <h4 style="color: white; margin-bottom: 15px;">Initiate Stock Transfer</h4>
+                <form id="transferForm" onsubmit="initiateTransfer(event)" style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                    <div style="display: flex; flex-direction: column;">
+                        <label for="transProductId" style="color: white; font-size: 12px; margin-bottom: 5px;">Product ID</label>
+                        <input type="number" id="transProductId" placeholder="Product ID" required style="width: 110px;">
+                    </div>
+                    <div style="display: flex; flex-direction: column;">
+                        <label for="transFromStoreId" style="color: white; font-size: 12px; margin-bottom: 5px;">From Store ID</label>
+                        <input type="number" id="transFromStoreId" placeholder="From Store" required style="width: 110px;">
+                    </div>
+                    <div style="display: flex; flex-direction: column;">
+                        <label for="transToStoreId" style="color: white; font-size: 12px; margin-bottom: 5px;">To Store ID</label>
+                        <input type="number" id="transToStoreId" placeholder="To Store" required style="width: 110px;">
+                    </div>
+                    <div style="display: flex; flex-direction: column;">
+                        <label for="transQuantity" style="color: white; font-size: 12px; margin-bottom: 5px;">Quantity</label>
+                        <input type="number" id="transQuantity" placeholder="Quantity" required style="width: 100px;">
+                    </div>
+                    <div style="display: flex; flex-direction: column; justify-content: flex-end; height: 50px;">
+                        <input type="submit" value="Initiate Transfer" class="btn btn-primary" style="padding: 6px 15px; margin-top: auto;">
+                    </div>
+                </form>
+            </div>
+
+            <div class="tablediv container-fluid">
+                <h4 style="color: white; margin-top: 20px; margin-bottom: 10px;">Transfer Logs</h4>
+                <table class="table table-hover styled-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Transfer ID</th>
+                            <th scope="col">Product ID</th>
+                            <th scope="col">From Store ID</th>
+                            <th scope="col">To Store ID</th>
+                            <th scope="col">Quantity</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Requested At</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transferLogs">
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

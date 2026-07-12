@@ -177,4 +177,11 @@ public class InventoryController {
 
     }
 
+    @GetMapping("/low-stock/{storeId}")
+    @Operation(summary = "Get low stock items for store", description = "Retrieve a list of inventory items for a store where the stock level is below the configured threshold.")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved low stock items")
+    public List<Inventory> getLowStockItems(@PathVariable Long storeId) {
+        return inventoryRepository.findLowStockByStoreId(storeId);
+    }
+
 }

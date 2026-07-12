@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import io.swagger.v3.oas.annotations.Operation;
@@ -43,6 +44,73 @@ public class ProductController {
 
     @Autowired
     private InventoryRepository inventoryRepository;
+
+    @Autowired
+    private com.project.code.Repo.ReviewRepository reviewRepository;
+
+    @GetMapping("/search")
+    @Operation(summary = "Search products with combined filters", description = "Query products by SKU, Category, Price range, Store availability, and minimum average rating from MongoDB reviews.")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved search results")
+    public Map<String, Object> searchProducts(
+            @RequestParam(required = false) String sku,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) Long storeId,
+            @RequestParam(required = false) Double minRating,
+            org.springframework.data.domain.Pageable pageable) {
+
+        org.springframework.data.jpa.domain.Specification<Product> spec = org.springframework.data.jpa.domain.Specification.where(
+                com.project.code.specification.ProductSpecification.hasSkuLike(sku)
+        ).and(
+                com.project.code.specification.ProductSpecification.hasCategoryId(categoryId)
+        ).and(
+                com.project.code.specification.ProductSpecification.hasPriceBetween(minPrice, maxPrice)
+        ).and(
+                com.project.code.specification.ProductSpecification.isAvailableInStore(storeId)
+        );
+
+        List<Product> products = productRepository.findAll(spec);
+
+        // Fetch MongoDB ratings and group
+        List<com.project.code.Model.Review> reviews = reviewRepository.findAll();
+        java.util.Map<Long, List<Integer>> ratingsMap = new java.util.HashMap<>();
+        for (com.project.code.Model.Review r : reviews) {
+            ratingsMap.computeIfAbsent(r.getProductId(), k -> new java.util.ArrayList<>()).add(r.getRating());
+        }
+
+        java.util.Map<Long, Double> avgRatings = new java.util.HashMap<>();
+        for (java.util.Map.Entry<Long, List<Integer>> entry : ratingsMap.entrySet()) {
+            double avg = entry.getValue().stream().mapToInt(Integer::intValue).average().orElse(0.0);
+            avgRatings.put(entry.getKey(), avg);
+        }
+
+        // Filter products in memory by minRating if requested
+        if (minRating != null) {
+            products = products.stream()
+                    .filter(p -> avgRatings.getOrDefault(p.getId(), 0.0) >= minRating)
+                    .collect(java.util.stream.Collectors.toList());
+        }
+
+        // Manually paginate the list
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), products.size());
+        List<Product> pageContent = new java.util.ArrayList<>();
+        if (start <= products.size()) {
+            pageContent = products.subList(start, end);
+        }
+
+        org.springframework.data.domain.Page<Product> page = new org.springframework.data.domain.PageImpl<>(
+                pageContent, pageable, products.size()
+        );
+
+        Map<String, Object> map = new java.util.HashMap<>();
+        map.put("products", page.getContent());
+        map.put("currentPage", page.getNumber());
+        map.put("totalItems", page.getTotalElements());
+        map.put("totalPages", page.getTotalPages());
+        return map;
+    }
 
     @PostMapping
     @Operation(summary = "Add a new product", description = "Create and store a new product in the database. Accessible by ADMIN and MANAGER.")
