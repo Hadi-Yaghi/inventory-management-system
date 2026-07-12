@@ -1476,3 +1476,56 @@ async function handleOverlayLogin(event) {
         alert('Connection error: ' + e.message);
     }
 }
+
+// ═══════════════════════════════════════════════════════════════════════
+// BARCODE / QR CODE SCANNER (uses HTML5-QRCode library)
+// ═══════════════════════════════════════════════════════════════════════
+let html5QrScanner = null;
+
+function toggleBarcodeScanner() {
+    const container = document.getElementById('barcodeScannerContainer');
+    if (container.style.display === 'none') {
+        container.style.display = 'block';
+        startBarcodeScanner();
+    } else {
+        stopBarcodeScanner();
+    }
+}
+
+function startBarcodeScanner() {
+    if (html5QrScanner) {
+        html5QrScanner.clear();
+    }
+    html5QrScanner = new Html5QrcodeScanner("barcodeScannerReader", {
+        fps: 10,
+        qrbox: { width: 250, height: 150 },
+        rememberLastUsedCamera: true
+    });
+    html5QrScanner.render(onBarcodeScanSuccess, onBarcodeScanFailure);
+}
+
+function onBarcodeScanSuccess(decodedText, decodedResult) {
+    // Fill the search field with the scanned value
+    const searchBar = document.getElementById('searchBar');
+    if (searchBar) {
+        searchBar.value = decodedText;
+        searchBar.disabled = false;
+    }
+    // Stop scanner after successful scan
+    stopBarcodeScanner();
+    // Trigger a search
+    filter();
+}
+
+function onBarcodeScanFailure(error) {
+    // Silently ignore scan failures (continuous scanning)
+}
+
+function stopBarcodeScanner() {
+    const container = document.getElementById('barcodeScannerContainer');
+    if (html5QrScanner) {
+        try { html5QrScanner.clear(); } catch (e) { }
+        html5QrScanner = null;
+    }
+    if (container) container.style.display = 'none';
+}

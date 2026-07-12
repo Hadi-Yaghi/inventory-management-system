@@ -94,22 +94,62 @@
                 <input type="submit" value="Update product">
             </div>
         </form>
+
+        <!-- Barcode / QR Code Preview Panel -->
+        <div id="barcodePanel" style="margin-left: 40px; text-align: center; min-width: 280px;">
+            <h4>Product QR Code</h4>
+            <img id="qrCodeImage" src="" alt="QR Code" style="max-width: 250px; max-height: 250px; border: 1px solid #ccc; border-radius: 8px; display: none;">
+            <p id="qrCodeSku" style="margin-top: 8px; font-weight: bold; color: #333;"></p>
+            <div style="margin-top: 12px;">
+                <button type="button" onclick="switchBarcodeType('qr')" style="margin-right: 8px;" class="btn btn-sm btn-outline-primary">QR Code</button>
+                <button type="button" onclick="switchBarcodeType('barcode')" class="btn btn-sm btn-outline-secondary">Barcode</button>
+            </div>
+        </div>
     </div>
 
 
 
     <script>
+        let currentProductId = null;
+        let currentBarcodeType = 'qr';
+
         window.onload = async () => {
             const url = window.location.href;
             const params = new URLSearchParams(window.location.search);
             const productId = params.get('productId');
+            currentProductId = productId;
             document.getElementById('pproductId').value = productId;
 
             await loadCategoriesAndSuppliers();
             getProductByid(productId);
+            loadBarcode(productId, currentBarcodeType);
         }
 
+        function loadBarcode(productId, type) {
+            if (!productId) return;
+            const token = localStorage.getItem('jwtToken');
+            const img = document.getElementById('qrCodeImage');
+            // Use fetch to get image with auth header
+            fetch(`http://localhost:8081/product/${productId}/barcode?type=${type}`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Barcode not available');
+                return response.blob();
+            })
+            .then(blob => {
+                img.src = URL.createObjectURL(blob);
+                img.style.display = 'block';
+            })
+            .catch(err => {
+                img.style.display = 'none';
+                console.log('Barcode load error:', err);
+            });
+        }
 
+        function switchBarcodeType(type) {
+            currentBarcodeType = type;
+            loadBarcode(currentProductId, type);
         }
 
     </script>

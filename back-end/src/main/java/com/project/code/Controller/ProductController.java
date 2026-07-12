@@ -240,5 +240,33 @@ public class ProductController {
         return map;
     }
 
+    @Autowired
+    private com.project.code.Service.BarcodeService barcodeService;
+
+    @GetMapping("/{id}/barcode")
+    @Operation(summary = "Generate barcode for product", description = "Returns a QR code PNG image encoding the product SKU.")
+    @ApiResponse(responseCode = "200", description = "Barcode image generated successfully")
+    public org.springframework.http.ResponseEntity<byte[]> getProductBarcode(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "qr") String type) {
+        Product product = productRepository.findByid(id);
+        if (product == null) {
+            return org.springframework.http.ResponseEntity.notFound().build();
+        }
+        try {
+            byte[] imageBytes;
+            if ("barcode".equalsIgnoreCase(type)) {
+                imageBytes = barcodeService.generateBarcode(product.getSku(), 300, 100);
+            } else {
+                imageBytes = barcodeService.generateQrCode(product.getSku(), 250, 250);
+            }
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.IMAGE_PNG);
+            headers.setContentLength(imageBytes.length);
+            return org.springframework.http.ResponseEntity.ok().headers(headers).body(imageBytes);
+        } catch (Exception e) {
+            return org.springframework.http.ResponseEntity.internalServerError().build();
+        }
+    }
 
 }

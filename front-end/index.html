@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="frontend.css">
     <link rel="shortcut icon" href="images/Logo.png" type="image/x-icon">
     <script src="script.js"></script>
+    <!-- HTML5 QR Code scanner library -->
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 </head>
 <body>
     <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
@@ -86,9 +88,14 @@
                                 <option value="Accessories">Accessories</option>
                             </select>
                         </div>
-                        <div class="col" style="display: flex;">
+                        <div class="col" style="display: flex; align-items: center;">
                             <input type="text" name="searchBar" id="searchBar" placeholder="Type Here" disabled>
                             <input type="submit" id="SearchButton" value="Search" onclick="filter()" disabled>
+                            <button type="button" id="scanBarcodeBtn" class="btn btn-sm btn-outline-info" style="margin-left: 8px; white-space: nowrap;" onclick="toggleBarcodeScanner()" title="Scan barcode with webcam">&#128247; Scan</button>
+                        </div>
+                        <div id="barcodeScannerContainer" style="display: none; margin-top: 10px; margin-bottom: 10px;">
+                            <div id="barcodeScannerReader" style="width: 320px; margin: 0 auto;"></div>
+                            <button type="button" class="btn btn-sm btn-outline-danger" style="margin-top: 6px;" onclick="stopBarcodeScanner()">Stop Scanner</button>
                         </div>
                         <div class="col">
                             <input type="submit" id="AddProducts" value="Add Product" onclick="redirectToAddPrdouct()"
