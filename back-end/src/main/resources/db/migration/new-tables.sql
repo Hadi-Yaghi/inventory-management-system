@@ -81,7 +81,7 @@ INSERT IGNORE INTO supplier (id, name, contact_email, phone, address) VALUES
 
 -- Insert default users with BCrypt-hashed password: "password"
 INSERT IGNORE INTO users (id, username, email, password_hash, role) VALUES
-(1, 'admin', 'admin@example.com', '$2a$10$tZ2qM/d1qW/w0XU/eH9lDeB8Vq55aW.nE0cOux3y.bU8y5uO0tC0e', 'ADMIN'),
-(2, 'manager', 'manager@example.com', '$2a$10$tZ2qM/d1qW/w0XU/eH9lDeB8Vq55aW.nE0cOux3y.bU8y5uO0tC0e', 'MANAGER'),
-(3, 'employee', 'employee@example.com', '$2a$10$tZ2qM/d1qW/w0XU/eH9lDeB8Vq55aW.nE0cOux3y.bU8y5uO0tC0e', 'EMPLOYEE');
+(1, 'admin', 'admin@example.com', '$2a$10$i7iKTcCXMbkIdJISup7dA.6jSHE/XabyB1YeBs9SKJsVl6piY1yxC', 'ADMIN'),
+(2, 'manager', 'manager@example.com', '$2a$10$i7iKTcCXMbkIdJISup7dA.6jSHE/XabyB1YeBs9SKJsVl6piY1yxC', 'MANAGER'),
+(3, 'employee', 'employee@example.com', '$2a$10$i7iKTcCXMbkIdJISup7dA.6jSHE/XabyB1YeBs9SKJsVl6piY1yxC', 'EMPLOYEE');
 
