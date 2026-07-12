@@ -4,14 +4,16 @@ package com.project.code.Repo;
 import com.project.code.Model.OrderDetails;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import java.util.List;
+
 public interface OrderDetailsRepository extends JpaRepository<OrderDetails,Long> {
-// 1. Add the repository interface:
-//    - Extend JpaRepository<OrderDetails, Long> to inherit basic CRUD functionality.
-//    - This allows the repository to perform operations like save, delete, update, and find without having to implement these methods manually.
 
-// Example: public interface OrderDetailsRepository extends JpaRepository<OrderDetails, Long> {}
+    @Query("SELECT COALESCE(SUM(o.totalPrice), 0.0) FROM OrderDetails o WHERE o.date BETWEEN :startDate AND :endDate AND o.orderStatus <> 'CANCELLED'")
+    Double getTotalRevenue(@Param("startDate") java.time.LocalDateTime startDate, @Param("endDate") java.time.LocalDateTime endDate);
 
-// 2. Since no custom methods are required for this repository, the default CRUD operations (save, delete, update, findById, etc.) are available out of the box.
-
+    @Query("SELECT o.orderStatus, COUNT(o) FROM OrderDetails o GROUP BY o.orderStatus")
+    List<Object[]> getOrderCountsByStatus();
 }
 
