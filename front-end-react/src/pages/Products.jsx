@@ -90,13 +90,16 @@ const Products = () => {
                   <th className="p-4 font-medium">SKU</th>
                   <th className="p-4 font-medium">Price</th>
                   <th className="p-4 font-medium">Category</th>
+                  <th className="p-4 font-medium">Available</th>
+                  <th className="p-4 font-medium">Reserved</th>
+                  <th className="p-4 font-medium">On Hand</th>
                   <th className="p-4 font-medium text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="text-sm divide-y divide-slate-200">
                 {products?.length === 0 ? (
                   <tr>
-                    <td colSpan="5" className="p-8 text-center text-slate-500">
+                    <td colSpan="8" className="p-8 text-center text-slate-500">
                       No products found.
                     </td>
                   </tr>
@@ -112,6 +115,9 @@ const Products = () => {
                       <td className="p-4 text-slate-600">{product.sku}</td>
                       <td className="p-4 text-slate-600">${product.price?.toFixed(2)}</td>
                       <td className="p-4 text-slate-600">{product.category?.name || 'N/A'}</td>
+                      <td className="p-4 text-slate-900 font-medium">{product.availableQuantity ?? 0}</td>
+                      <td className="p-4 text-slate-500 font-medium">{product.reservedQuantity ?? 0}</td>
+                      <td className="p-4 text-slate-600 font-medium">{product.stockLevel ?? 0}</td>
                       <td className="p-4 text-right space-x-3">
                         <Link
                           to={`/products/${product.id}`}

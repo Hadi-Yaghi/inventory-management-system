@@ -45,9 +45,33 @@ public class Product {
     private Double price;
     @NotNull(message = "Sku cannot be empty")
     private String sku;
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product", fetch = FetchType.EAGER)
     @JsonBackReference("inventory-product")
     private List<Inventory> inventoryList;
+
+    @com.fasterxml.jackson.annotation.JsonProperty("availableQuantity")
+    public int getAvailableQuantity() {
+        if (inventoryList == null) return 0;
+        return inventoryList.stream()
+                .mapToInt(i -> i.getAvailableQuantity())
+                .sum();
+    }
+
+    @com.fasterxml.jackson.annotation.JsonProperty("reservedQuantity")
+    public int getReservedQuantity() {
+        if (inventoryList == null) return 0;
+        return inventoryList.stream()
+                .mapToInt(i -> i.getReservedQuantity())
+                .sum();
+    }
+
+    @com.fasterxml.jackson.annotation.JsonProperty("stockLevel")
+    public int getStockLevel() {
+        if (inventoryList == null) return 0;
+        return inventoryList.stream()
+                .mapToInt(i -> i.getStockLevel() != null ? i.getStockLevel() : 0)
+                .sum();
+    }
 
     public long getId() {
         return id;

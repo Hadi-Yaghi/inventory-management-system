@@ -40,12 +40,12 @@ public class OrderService {
         List<PurchaseProductDTO> purchaseProducts = placeOrderRequest.getPurchaseProduct();
         if (purchaseProducts != null) {
             for (PurchaseProductDTO productDTO : purchaseProducts) {
-                Inventory inventory = inventoryRepository.findByProductIdAndStoreId(productDTO.getId(), placeOrderRequest.getStoreId());
+                Inventory inventory = inventoryRepository.findByProductIdAndStoreIdWithLock(productDTO.getId(), placeOrderRequest.getStoreId());
                 if (inventory == null) {
                     throw new NotFoundException("Inventory record not found for product ID " + productDTO.getId() + " at store ID " + placeOrderRequest.getStoreId());
                 }
-                if (inventory.getStockLevel() == null || inventory.getStockLevel() < productDTO.getQuantity()) {
-                    throw new InsufficientStockException("Insufficient stock for product: " + productDTO.getName() + ". Available: " + (inventory.getStockLevel() != null ? inventory.getStockLevel() : 0) + ", Requested: " + productDTO.getQuantity());
+                if (inventory.getStockLevel() == null || inventory.getAvailableQuantity() < productDTO.getQuantity()) {
+                    throw new InsufficientStockException("Insufficient stock for product: " + productDTO.getName() + ". Available: " + (inventory.getAvailableQuantity() != null ? inventory.getAvailableQuantity() : 0) + ", Requested: " + productDTO.getQuantity());
                 }
             }
         }
@@ -79,8 +79,8 @@ public class OrderService {
         if (purchaseProducts != null) {
             for (PurchaseProductDTO productDTO : purchaseProducts) {
                 OrderItem orderItem = new OrderItem();
-                Inventory inventory = inventoryRepository.findByProductIdAndStoreId(productDTO.getId(),placeOrderRequest.getStoreId());
-                inventory.setStockLevel(inventory.getStockLevel()-productDTO.getQuantity());
+                Inventory inventory = inventoryRepository.findByProductIdAndStoreIdWithLock(productDTO.getId(),placeOrderRequest.getStoreId());
+                inventory.setReservedQuantity(inventory.getReservedQuantity() + productDTO.getQuantity());
 
                 inventoryRepository.save(inventory);
                 orderItem.setOrder(orderDetails);
@@ -130,15 +130,31 @@ public class OrderService {
         order.setOrderStatus(newStatus);
         orderDetailsRepository.save(order);
 
-        // If cancelling, restore inventory stock level
+        // If completed, convert reservation to actual deduction
+        if (newStatus == OrderStatus.COMPLETED) {
+            List<OrderItem> items = order.getOrderItems();
+            if (items != null) {
+                for (OrderItem item : items) {
+                    Inventory inventory = inventoryRepository.findByProductIdAndStoreIdWithLock(
+                            item.getProduct().getId(), order.getStore().getId());
+                    if (inventory != null) {
+                        inventory.setStockLevel(Math.max(0, inventory.getStockLevel() - item.getQuantity()));
+                        inventory.setReservedQuantity(Math.max(0, inventory.getReservedQuantity() - item.getQuantity()));
+                        inventoryRepository.save(inventory);
+                    }
+                }
+            }
+        }
+
+        // If cancelling, release reservation
         if (newStatus == OrderStatus.CANCELLED) {
             List<OrderItem> items = order.getOrderItems();
             if (items != null) {
                 for (OrderItem item : items) {
-                    Inventory inventory = inventoryRepository.findByProductIdAndStoreId(
+                    Inventory inventory = inventoryRepository.findByProductIdAndStoreIdWithLock(
                             item.getProduct().getId(), order.getStore().getId());
                     if (inventory != null) {
-                        inventory.setStockLevel(inventory.getStockLevel() + item.getQuantity());
+                        inventory.setReservedQuantity(Math.max(0, inventory.getReservedQuantity() - item.getQuantity()));
                         inventoryRepository.save(inventory);
                     }
                 }

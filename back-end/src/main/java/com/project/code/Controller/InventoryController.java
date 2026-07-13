@@ -201,6 +201,8 @@ public class InventoryController {
         response.put("id", inventory.getId());
         response.put("stockLevel", inventory.getStockLevel());
         response.put("quantity", inventory.getStockLevel());
+        response.put("reservedQuantity", inventory.getReservedQuantity());
+        response.put("availableQuantity", inventory.getAvailableQuantity());
         response.put("lowStockThreshold", inventory.getLowStockThreshold());
         response.put("minThreshold", inventory.getLowStockThreshold());
 

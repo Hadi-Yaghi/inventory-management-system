@@ -8,6 +8,7 @@ import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import Products from './pages/Products';
 import Orders from './pages/Orders';
+import PurchaseOrders from './pages/PurchaseOrders';
 import Inventory from './pages/Inventory';
 import Categories from './pages/Categories';
 import Users from './pages/Users';
@@ -32,6 +33,7 @@ function App() {
               <Route path="/products" element={<Products />} />
               <Route path="/inventory" element={<Inventory />} />
               <Route path="/orders" element={<Orders />} />
+              <Route path="/purchase-orders" element={<PurchaseOrders />} />
               <Route path="/returns" element={<Returns />} />
               <Route path="/reviews" element={<Reviews />} />
               

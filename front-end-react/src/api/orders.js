@@ -20,3 +20,8 @@ export const downloadInvoice = async (id) => {
   const response = await api.get(`/orders/${id}/invoice`, { responseType: 'blob' });
   return response;
 };
+
+export const placeOrder = async (orderData) => {
+  const response = await api.post('/store/placeOrder', orderData);
+  return response.data;
+};

@@ -89,6 +89,11 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/category/**", "/supplier/**").hasAnyRole("ADMIN", "MANAGER")
                 .requestMatchers(HttpMethod.DELETE, "/category/**", "/supplier/**").hasAnyRole("ADMIN", "MANAGER")
 
+                // 5.1 Purchase Order writes (POST/PUT/DELETE) restricted to ADMIN, MANAGER
+                .requestMatchers(HttpMethod.POST, "/purchase-orders/**").hasAnyRole("ADMIN", "MANAGER")
+                .requestMatchers(HttpMethod.PUT, "/purchase-orders/**").hasAnyRole("ADMIN", "MANAGER")
+                .requestMatchers(HttpMethod.DELETE, "/purchase-orders/**").hasAnyRole("ADMIN", "MANAGER")
+
                 // 6. Stock Transfers
                 .requestMatchers(HttpMethod.POST, "/transfers/initiate").hasAnyRole("ADMIN", "MANAGER", "EMPLOYEE")
                 .requestMatchers(HttpMethod.POST, "/transfers/*/confirm").hasAnyRole("ADMIN", "MANAGER")

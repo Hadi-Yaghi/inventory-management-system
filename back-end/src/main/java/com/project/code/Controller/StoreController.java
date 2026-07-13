@@ -84,18 +84,24 @@ public class StoreController {
     @PostMapping("/placeOrder")
     @Operation(summary = "Place a new order", description = "Place a new order for a store, including customer details and products to purchase. Accessible by ADMIN, MANAGER, and EMPLOYEE.")
     @ApiResponse(responseCode = "200", description = "Order placed successfully")
-    public Map<String,String> placeOrder(@Valid @RequestBody PlaceOrderRequestDTO placeOrderRequest) {
+    public ResponseEntity<Map<String,String>> placeOrder(@Valid @RequestBody PlaceOrderRequestDTO placeOrderRequest) {
 
         Map<String,String> map=new HashMap<>();
         try{
             orderService.saveOrder(placeOrderRequest);
             map.put("message","Order placed successfully");
+            return ResponseEntity.ok(map);
+        }
+        catch(com.project.code.exception.InsufficientStockException e)
+        {
+            map.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(map);
         }
         catch(Exception e)
         {
             map.put("error", e.getMessage());
+            return ResponseEntity.internalServerError().body(map);
         }
-        return map;
     }
 
 }

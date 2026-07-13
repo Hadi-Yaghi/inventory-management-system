@@ -97,6 +97,40 @@ public class ActivityLoggingAspect {
         return result;
     }
 
+    // ── Purchase Order mutations ───────────────────────────────────────────
+    @Around("execution(* com.project.code.Controller.PurchaseOrderController.createPurchaseOrder(..))")
+    public Object logPurchaseOrderCreate(ProceedingJoinPoint jp) throws Throwable {
+        Object result = jp.proceed();
+        if (result instanceof org.springframework.http.ResponseEntity) {
+            Object body = ((org.springframework.http.ResponseEntity<?>) result).getBody();
+            if (body instanceof com.project.code.Model.PurchaseOrder) {
+                com.project.code.Model.PurchaseOrder po = (com.project.code.Model.PurchaseOrder) body;
+                log("CREATE", "PurchaseOrder", String.valueOf(po.getId()), "Created purchase order ID: " + po.getId() + " (Supplier: " + (po.getSupplier() != null ? po.getSupplier().getName() : "N/A") + ")");
+            }
+        }
+        return result;
+    }
+
+    @Around("execution(* com.project.code.Controller.PurchaseOrderController.receiveShipment(..))")
+    public Object logPurchaseOrderReceive(ProceedingJoinPoint jp) throws Throwable {
+        Object result = jp.proceed();
+        Object[] args = jp.getArgs();
+        if (args.length > 0) {
+            log("UPDATE", "PurchaseOrder", String.valueOf(args[0]), "Received shipment for purchase order ID: " + args[0]);
+        }
+        return result;
+    }
+
+    @Around("execution(* com.project.code.Controller.PurchaseOrderController.cancelPurchaseOrder(..))")
+    public Object logPurchaseOrderCancel(ProceedingJoinPoint jp) throws Throwable {
+        Object result = jp.proceed();
+        Object[] args = jp.getArgs();
+        if (args.length > 0) {
+            log("UPDATE", "PurchaseOrder", String.valueOf(args[0]), "Cancelled purchase order ID: " + args[0]);
+        }
+        return result;
+    }
+
     // ── Helper ───────────────────────────────────────────────────────────
     private void log(String action, String entityType, String entityId, String details) {
         String userId = "ANONYMOUS";

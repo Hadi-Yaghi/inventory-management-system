@@ -26,9 +26,25 @@ public class Inventory {
 
     private Integer stockLevel;
 
+    @Column(name = "reserved_quantity", nullable = false)
+    private Integer reservedQuantity = 0;
+
     private Integer lowStockThreshold = 10;
 
     public Inventory() {}
+
+    public Integer getReservedQuantity() {
+        return reservedQuantity != null ? reservedQuantity : 0;
+    }
+
+    public void setReservedQuantity(Integer reservedQuantity) {
+        this.reservedQuantity = reservedQuantity;
+    }
+
+    public Integer getAvailableQuantity() {
+        return (stockLevel != null ? stockLevel : 0) - getReservedQuantity();
+    }
+
 
     public Integer getLowStockThreshold() { return lowStockThreshold; }
 
@@ -38,6 +54,7 @@ public class Inventory {
         this.product = product;
         this.store = store;
         this.stockLevel = stockLevel;
+        this.reservedQuantity = 0;
     }
 
 

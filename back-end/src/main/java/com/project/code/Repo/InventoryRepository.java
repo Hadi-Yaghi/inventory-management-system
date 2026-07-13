@@ -3,8 +3,12 @@ package com.project.code.Repo;
 import com.project.code.Model.Inventory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import jakarta.persistence.LockModeType;
 
 import java.util.List;
 
@@ -36,15 +40,21 @@ public interface InventoryRepository extends JpaRepository<Inventory,Long> {
 //      - Return type: void
 //      - Parameter: Long productId
 //      - Use @Modifying and @Transactional annotations to ensure the database is modified correctly.
+
     public Inventory findByProductIdAndStoreId(Long productId,Long storeId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT i FROM Inventory i WHERE i.product.id = :productId AND i.store.id = :storeId")
+    public Inventory findByProductIdAndStoreIdWithLock(@Param("productId") Long productId, @Param("storeId") Long storeId);
+
     public List<Inventory> findByStoreId(Long storeId);
     @Modifying
     @Transactional
     public void deleteByProductId(Long productId);
 
-    @org.springframework.data.jpa.repository.Query("SELECT i FROM Inventory i WHERE i.store.id = :storeId AND i.stockLevel <= i.lowStockThreshold")
-    public List<Inventory> findLowStockByStoreId(Long storeId);
+    @Query("SELECT i FROM Inventory i WHERE i.store.id = :storeId AND (i.stockLevel - COALESCE(i.reservedQuantity, 0)) <= i.lowStockThreshold")
+    public List<Inventory> findLowStockByStoreId(@Param("storeId") Long storeId);
 
-    @org.springframework.data.jpa.repository.Query("SELECT i FROM Inventory i WHERE i.stockLevel <= i.lowStockThreshold")
+    @Query("SELECT i FROM Inventory i WHERE (i.stockLevel - COALESCE(i.reservedQuantity, 0)) <= i.lowStockThreshold")
     public List<Inventory> findAllLowStock();
 }

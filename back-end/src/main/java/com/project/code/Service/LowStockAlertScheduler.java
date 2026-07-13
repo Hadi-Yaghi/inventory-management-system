@@ -29,10 +29,11 @@ public class LowStockAlertScheduler {
         if (!lowStockItems.isEmpty()) {
             StringBuilder sb = new StringBuilder();
             for (Inventory item : lowStockItems) {
-                String line = String.format("Store: '%s', Product: '%s', Stock Level: %d, Threshold: %d",
+                String line = String.format("Store: '%s', Product: '%s', Stock Level: %d, Available Level: %d, Threshold: %d",
                         item.getStore().getName(),
                         item.getProduct().getName(),
                         item.getStockLevel(),
+                        item.getAvailableQuantity(),
                         item.getLowStockThreshold());
                 log.warn(line);
                 sb.append(line).append("\n");

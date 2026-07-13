@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/auth-context';
-import { LayoutDashboard, Package, Users, LogOut, Tags, Truck, FileText, Activity, RotateCcw, Star, Download } from 'lucide-react';
+import { LayoutDashboard, Package, Users, LogOut, Tags, Truck, FileText, Activity, RotateCcw, Star, Download, ShoppingCart } from 'lucide-react';
 
 const Layout = () => {
   const { user, logout } = useAuth();
@@ -13,6 +13,7 @@ const Layout = () => {
     { name: 'Categories', href: '/categories', icon: Tags, roles: ['ADMIN', 'MANAGER'] },
     { name: 'Inventory', href: '/inventory', icon: Truck, roles: ['ADMIN', 'MANAGER', 'EMPLOYEE'] },
     { name: 'Orders', href: '/orders', icon: FileText, roles: ['ADMIN', 'MANAGER', 'EMPLOYEE'] },
+    { name: 'Purchase Orders', href: '/purchase-orders', icon: ShoppingCart, roles: ['ADMIN', 'MANAGER', 'EMPLOYEE'] },
     { name: 'Returns', href: '/returns', icon: RotateCcw, roles: ['ADMIN', 'MANAGER', 'EMPLOYEE'] },
     { name: 'Reviews', href: '/reviews', icon: Star, roles: ['ADMIN', 'MANAGER', 'EMPLOYEE'] },
     { name: 'Reports', href: '/reports', icon: Download, roles: ['ADMIN', 'MANAGER'] },

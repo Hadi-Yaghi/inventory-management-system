@@ -52,10 +52,14 @@ public class ReturnService {
         Store store = order.getStore();
         Product product = orderItem.getProduct();
 
-        // Find relevant inventory and restock
-        Inventory inventory = inventoryRepository.findByProductIdAndStoreId(product.getId(), store.getId());
+        // Find relevant inventory and restock or release reservation
+        Inventory inventory = inventoryRepository.findByProductIdAndStoreIdWithLock(product.getId(), store.getId());
         if (inventory != null) {
-            inventory.setStockLevel(inventory.getStockLevel() + request.getQuantity());
+            if (order.getOrderStatus() != OrderStatus.COMPLETED) {
+                inventory.setReservedQuantity(Math.max(0, inventory.getReservedQuantity() - request.getQuantity()));
+            } else {
+                inventory.setStockLevel(inventory.getStockLevel() + request.getQuantity());
+            }
             inventoryRepository.save(inventory);
         }
 

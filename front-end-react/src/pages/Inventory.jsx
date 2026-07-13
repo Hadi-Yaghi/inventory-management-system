@@ -166,7 +166,9 @@ const Inventory = () => {
                 <tr className="bg-slate-50 text-slate-600 text-sm border-b border-slate-200">
                   <th className="p-4 font-medium">Store</th>
                   <th className="p-4 font-medium">Product</th>
-                  <th className="p-4 font-medium">Quantity</th>
+                  <th className="p-4 font-medium">Available</th>
+                  <th className="p-4 font-medium">Reserved</th>
+                  <th className="p-4 font-medium">On Hand</th>
                   <th className="p-4 font-medium">Min Threshold</th>
                   <th className="p-4 font-medium">Status</th>
                 </tr>
@@ -174,13 +176,15 @@ const Inventory = () => {
               <tbody className="text-sm divide-y divide-slate-200">
                 {inventory?.length === 0 ? (
                   <tr>
-                    <td colSpan="5" className="p-8 text-center text-slate-500">
+                    <td colSpan="7" className="p-8 text-center text-slate-500">
                       No inventory records found.
                     </td>
                   </tr>
                 ) : (
                   inventory?.map((item) => {
                     const stockLevel = item.stockLevel ?? item.quantity ?? 0;
+                    const reserved = item.reservedQuantity ?? 0;
+                    const available = item.availableQuantity ?? (stockLevel - reserved);
                     const threshold = item.lowStockThreshold ?? item.minThreshold ?? 10;
 
                     return (
@@ -189,10 +193,12 @@ const Inventory = () => {
                         {item.store?.name || 'Main Warehouse'}
                       </td>
                       <td className="p-4 text-slate-600">{item.product?.name}</td>
-                      <td className="p-4 text-slate-900 font-medium">{stockLevel}</td>
+                      <td className="p-4 text-slate-900 font-medium">{available}</td>
+                      <td className="p-4 text-slate-500 font-medium">{reserved}</td>
+                      <td className="p-4 text-slate-600 font-medium">{stockLevel}</td>
                       <td className="p-4 text-slate-600">{threshold}</td>
                       <td className="p-4">
-                        {stockLevel <= threshold ? (
+                        {available <= threshold ? (
                           <span className="flex items-center text-red-600 font-medium text-xs bg-red-50 px-2 py-1 rounded-full w-fit">
                             <AlertTriangle className="h-3 w-3 mr-1" />
                             Low Stock
