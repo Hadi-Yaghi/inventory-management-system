@@ -80,22 +80,7 @@ public class ActivityLoggingAspect {
     }
 
     // ── Order mutations ──────────────────────────────────────────────────
-    @Around("execution(* com.project.code.Controller.StoreController.placeOrder(..))")
-    public Object logOrderCreate(ProceedingJoinPoint jp) throws Throwable {
-        Object result = jp.proceed();
-        log("CREATE", "Order", "-", "Order placed via placeOrder");
-        return result;
-    }
-
-    @Around("execution(* com.project.code.Controller.OrderController.transitionStatus(..))")
-    public Object logOrderStatusChange(ProceedingJoinPoint jp) throws Throwable {
-        Object result = jp.proceed();
-        Object[] args = jp.getArgs();
-        if (args.length >= 2) {
-            log("UPDATE", "Order", String.valueOf(args[0]), "Order status changed to " + args[1]);
-        }
-        return result;
-    }
+    // Order creation, status change, and purchase order receiving/cancellation logs have been refactored to Event Listeners (ActivityLoggingListener)
 
     // ── Purchase Order mutations ───────────────────────────────────────────
     @Around("execution(* com.project.code.Controller.PurchaseOrderController.createPurchaseOrder(..))")
@@ -111,25 +96,7 @@ public class ActivityLoggingAspect {
         return result;
     }
 
-    @Around("execution(* com.project.code.Controller.PurchaseOrderController.receiveShipment(..))")
-    public Object logPurchaseOrderReceive(ProceedingJoinPoint jp) throws Throwable {
-        Object result = jp.proceed();
-        Object[] args = jp.getArgs();
-        if (args.length > 0) {
-            log("UPDATE", "PurchaseOrder", String.valueOf(args[0]), "Received shipment for purchase order ID: " + args[0]);
-        }
-        return result;
-    }
 
-    @Around("execution(* com.project.code.Controller.PurchaseOrderController.cancelPurchaseOrder(..))")
-    public Object logPurchaseOrderCancel(ProceedingJoinPoint jp) throws Throwable {
-        Object result = jp.proceed();
-        Object[] args = jp.getArgs();
-        if (args.length > 0) {
-            log("UPDATE", "PurchaseOrder", String.valueOf(args[0]), "Cancelled purchase order ID: " + args[0]);
-        }
-        return result;
-    }
 
     // ── Helper ───────────────────────────────────────────────────────────
     private void log(String action, String entityType, String entityId, String details) {

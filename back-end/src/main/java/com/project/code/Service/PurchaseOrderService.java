@@ -3,7 +3,10 @@ package com.project.code.Service;
 import com.project.code.Model.*;
 import com.project.code.Repo.*;
 import com.project.code.exception.NotFoundException;
+import com.project.code.event.PurchaseOrderReceivedEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -35,14 +38,29 @@ public class PurchaseOrderService {
     @Autowired
     private InventoryRepository inventoryRepository;
 
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
+    @Autowired
+    private com.project.code.security.SecurityService securityService;
+
     public Page<PurchaseOrder> getPurchaseOrders(Long supplierId, Long storeId, PurchaseOrderStatus status, Pageable pageable) {
         Specification<PurchaseOrder> spec = Specification.where(null);
         
+        if (!securityService.isUserAdmin()) {
+            java.util.Set<Long> storeIds = securityService.getAssignedStoreIds();
+            if (storeId != null) {
+                securityService.verifyStoreAccess(storeId);
+                spec = spec.and((root, query, cb) -> cb.equal(root.get("store").get("id"), storeId));
+            } else {
+                spec = spec.and((root, query, cb) -> root.get("store").get("id").in(storeIds));
+            }
+        } else if (storeId != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("store").get("id"), storeId));
+        }
+
         if (supplierId != null) {
             spec = spec.and((root, query, cb) -> cb.equal(root.get("supplier").get("id"), supplierId));
-        }
-        if (storeId != null) {
-            spec = spec.and((root, query, cb) -> cb.equal(root.get("store").get("id"), storeId));
         }
         if (status != null) {
             spec = spec.and((root, query, cb) -> cb.equal(root.get("status"), status));
@@ -57,7 +75,10 @@ public class PurchaseOrderService {
     }
 
     @Transactional
+    @CacheEvict(value = {"dashboard", "analytics"}, allEntries = true)
     public PurchaseOrder createPurchaseOrder(CreatePurchaseOrderDTO dto, String username) {
+        securityService.verifyStoreAccess(dto.getStoreId());
+
         Supplier supplier = supplierRepository.findById(dto.getSupplierId())
                 .orElseThrow(() -> new NotFoundException("Supplier not found with ID: " + dto.getSupplierId()));
 
@@ -109,8 +130,13 @@ public class PurchaseOrderService {
     }
 
     @Transactional
+    @CacheEvict(value = {"dashboard", "analytics"}, allEntries = true)
     public PurchaseOrder receiveShipment(Long id, List<ReceiveItemDTO> receivedItems) {
         PurchaseOrder po = getPurchaseOrderById(id);
+        securityService.verifyStoreAccess(po.getStore().getId());
+
+        po.setReceivedBy(securityService.getCurrentUser());
+        po.setReceivedAt(LocalDateTime.now());
 
         if (po.getStatus() == PurchaseOrderStatus.CANCELLED) {
             throw new IllegalStateException("Cannot receive shipment for a CANCELLED purchase order.");
@@ -127,15 +153,6 @@ public class PurchaseOrderService {
                     .orElseThrow(() -> new NotFoundException("Product with ID " + receivedDto.getProductId() + " is not part of this purchase order."));
 
             targetItem.setQuantityReceived(targetItem.getQuantityReceived() + receivedDto.getQuantityReceived());
-
-            // Update Inventory stock level
-            Inventory inventory = inventoryRepository.findByProductIdAndStoreId(receivedDto.getProductId(), po.getStore().getId());
-            if (inventory == null) {
-                inventory = new Inventory(targetItem.getProduct(), po.getStore(), receivedDto.getQuantityReceived());
-            } else {
-                inventory.setStockLevel(inventory.getStockLevel() + receivedDto.getQuantityReceived());
-            }
-            inventoryRepository.save(inventory);
         }
 
         // Auto-transition status
@@ -159,18 +176,38 @@ public class PurchaseOrderService {
             po.setStatus(PurchaseOrderStatus.ORDERED);
         }
 
-        return purchaseOrderRepository.save(po);
+        PurchaseOrder savedPo = purchaseOrderRepository.save(po);
+        eventPublisher.publishEvent(new PurchaseOrderReceivedEvent(savedPo, receivedItems));
+        return savedPo;
     }
 
     @Transactional
+    @CacheEvict(value = {"dashboard", "analytics"}, allEntries = true)
     public PurchaseOrder cancelPurchaseOrder(Long id) {
         PurchaseOrder po = getPurchaseOrderById(id);
+        securityService.verifyStoreAccess(po.getStore().getId());
 
         if (po.getStatus() == PurchaseOrderStatus.RECEIVED || po.getStatus() == PurchaseOrderStatus.PARTIALLY_RECEIVED) {
             throw new IllegalStateException("Cannot cancel a purchase order that has already been partially or fully received.");
         }
 
         po.setStatus(PurchaseOrderStatus.CANCELLED);
+        return purchaseOrderRepository.save(po);
+    }
+
+    @Transactional
+    @CacheEvict(value = {"dashboard", "analytics"}, allEntries = true)
+    public PurchaseOrder approvePurchaseOrder(Long id) {
+        PurchaseOrder po = getPurchaseOrderById(id);
+        securityService.verifyStoreAccess(po.getStore().getId());
+
+        if (po.getStatus() != PurchaseOrderStatus.PENDING) {
+            throw new IllegalStateException("Only PENDING purchase orders can be approved. Current status: " + po.getStatus());
+        }
+
+        po.setStatus(PurchaseOrderStatus.ORDERED);
+        po.setApprovedBy(securityService.getCurrentUser());
+        po.setApprovedAt(LocalDateTime.now());
         return purchaseOrderRepository.save(po);
     }
 }

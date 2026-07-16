@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -84,6 +85,7 @@ public class ReviewController {
 
     @PostMapping
     @Operation(summary = "Submit a review", description = "Submit a product review. The system verifies if the customer has made a purchase of the product at the store to mark it as verified.")
+    @CacheEvict(value = "products", allEntries = true)
     public Review addReview(@jakarta.validation.Valid @RequestBody Review review) {
         boolean isVerified = orderItemRepository.existsByCustomerAndProductAndStore(
                 review.getCustomerId(), review.getProductId(), review.getStoreId());

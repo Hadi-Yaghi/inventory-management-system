@@ -52,7 +52,9 @@ public class Product {
     @com.fasterxml.jackson.annotation.JsonProperty("availableQuantity")
     public int getAvailableQuantity() {
         if (inventoryList == null) return 0;
+        java.util.Set<Long> storeIds = com.project.code.security.SecurityUtils.getCurrentUserStoreIds();
         return inventoryList.stream()
+                .filter(i -> storeIds == null || (i.getStore() != null && storeIds.contains(i.getStore().getId())))
                 .mapToInt(i -> i.getAvailableQuantity())
                 .sum();
     }
@@ -60,7 +62,9 @@ public class Product {
     @com.fasterxml.jackson.annotation.JsonProperty("reservedQuantity")
     public int getReservedQuantity() {
         if (inventoryList == null) return 0;
+        java.util.Set<Long> storeIds = com.project.code.security.SecurityUtils.getCurrentUserStoreIds();
         return inventoryList.stream()
+                .filter(i -> storeIds == null || (i.getStore() != null && storeIds.contains(i.getStore().getId())))
                 .mapToInt(i -> i.getReservedQuantity())
                 .sum();
     }
@@ -68,7 +72,9 @@ public class Product {
     @com.fasterxml.jackson.annotation.JsonProperty("stockLevel")
     public int getStockLevel() {
         if (inventoryList == null) return 0;
+        java.util.Set<Long> storeIds = com.project.code.security.SecurityUtils.getCurrentUserStoreIds();
         return inventoryList.stream()
+                .filter(i -> storeIds == null || (i.getStore() != null && storeIds.contains(i.getStore().getId())))
                 .mapToInt(i -> i.getStockLevel() != null ? i.getStockLevel() : 0)
                 .sum();
     }

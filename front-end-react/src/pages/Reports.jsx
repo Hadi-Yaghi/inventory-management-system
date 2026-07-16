@@ -2,7 +2,10 @@ import React, { useState } from 'react';
 import { Download, Loader2 } from 'lucide-react';
 import { exportReport } from '../api/misc';
 
+import { useAuth } from '../context/auth-context';
+
 const Reports = () => {
+  const { activeStore } = useAuth();
   const [loadingKey, setLoadingKey] = useState(null);
   const [error, setError] = useState('');
 
@@ -11,7 +14,7 @@ const Reports = () => {
     setLoadingKey(key);
     setError('');
     try {
-      const response = await exportReport(type, format);
+      const response = await exportReport(type, format, activeStore?.id);
       const blob = new Blob([response.data]);
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');

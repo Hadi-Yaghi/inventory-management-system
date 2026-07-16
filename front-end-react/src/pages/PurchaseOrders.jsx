@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../context/auth-context';
-import { getPurchaseOrders, createPurchaseOrder, receiveShipment, cancelPurchaseOrder } from '../api/purchaseOrders';
+import { getPurchaseOrders, createPurchaseOrder, receiveShipment, cancelPurchaseOrder, approvePurchaseOrder } from '../api/purchaseOrders';
 import { getSuppliers } from '../api/suppliers';
 import { getStores } from '../api/misc';
 import { getProducts } from '../api/products';
@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 
 const PurchaseOrders = () => {
-  const { user } = useAuth();
+  const { user, activeStore } = useAuth();
   const queryClient = useQueryClient();
   const canModify = user?.role === 'ADMIN' || user?.role === 'MANAGER';
 
@@ -40,12 +40,15 @@ const PurchaseOrders = () => {
   // Shipment receive state (productId -> quantityReceived)
   const [receiveQuantities, setReceiveQuantities] = useState({});
 
+  // Override storeId filter with activeStore if selected
+  const effectiveStoreId = activeStore?.id || storeId;
+
   // Queries
   const { data: poResponse, isLoading, isError } = useQuery({
-    queryKey: ['purchase-orders', page, supplierId, storeId, status],
+    queryKey: ['purchase-orders', page, supplierId, effectiveStoreId, status],
     queryFn: () => getPurchaseOrders({
       supplierId: supplierId || undefined,
-      storeId: storeId || undefined,
+      storeId: effectiveStoreId || undefined,
       status: status || undefined,
       page: page,
       size: 10,
@@ -112,6 +115,21 @@ const PurchaseOrders = () => {
     },
     onError: (err) => {
       setError(err.response?.data?.message || 'Failed to cancel purchase order');
+      setSuccess('');
+    }
+  });
+
+  const approveMutation = useMutation({
+    mutationFn: approvePurchaseOrder,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['purchase-orders'] });
+      setSuccess('Purchase order approved successfully.');
+      setError('');
+      setSelectedPO(null);
+      setShowDetailsModal(false);
+    },
+    onError: (err) => {
+      setError(err.response?.data?.message || 'Failed to approve purchase order');
       setSuccess('');
     }
   });
@@ -216,6 +234,12 @@ const PurchaseOrders = () => {
     }
   };
 
+  const handleApproveClick = (id) => {
+    if (window.confirm('Are you sure you want to approve this purchase order? This will transition status to ORDERED.')) {
+      approveMutation.mutate(id);
+    }
+  };
+
   const handleOpenReceiveModal = (po) => {
     setSelectedPO(po);
     // Auto-fill receive quantites with difference (ordered - received)
@@ -244,6 +268,12 @@ const PurchaseOrders = () => {
         return <span className="px-2 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-800">{status}</span>;
     }
   };
+
+  React.useEffect(() => {
+    if (showCreateForm && activeStore) {
+      setNewPO(prev => ({ ...prev, storeId: activeStore.id }));
+    }
+  }, [showCreateForm, activeStore]);
 
   const calculateTotalCost = (items) => {
     return items.reduce((sum, item) => sum + (item.quantityOrdered * item.unitCost), 0).toFixed(2);
@@ -320,7 +350,8 @@ const PurchaseOrders = () => {
                 required
                 value={newPO.storeId}
                 onChange={(e) => setNewPO({ ...newPO, storeId: e.target.value })}
-                className="w-full p-2 border border-slate-300 rounded-md focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
+                disabled={activeStore !== null}
+                className="w-full p-2 border border-slate-300 rounded-md focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-white disabled:bg-slate-50 disabled:text-slate-500 font-medium"
               >
                 <option value="">Select Store</option>
                 {stores?.map(st => <option key={st.id} value={st.id}>{st.name}</option>)}
@@ -553,7 +584,16 @@ const PurchaseOrders = () => {
                         >
                           <Eye className="h-4 w-4" />
                         </button>
-                        {canModify && po.status !== 'RECEIVED' && po.status !== 'CANCELLED' && (
+                        {canModify && po.status === 'PENDING' && (
+                          <button
+                            onClick={() => handleApproveClick(po.id)}
+                            title="Approve PO"
+                            className="p-1 border border-green-200 text-green-600 rounded hover:bg-green-50 inline-flex items-center justify-center transition"
+                          >
+                            <CheckCircle className="h-4 w-4" />
+                          </button>
+                        )}
+                        {canModify && po.status !== 'RECEIVED' && po.status !== 'CANCELLED' && po.status !== 'PENDING' && (
                           <button
                             onClick={() => handleOpenReceiveModal(po)}
                             title="Receive Shipment"
@@ -764,6 +804,14 @@ const PurchaseOrders = () => {
             </div>
 
             <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end space-x-3">
+              {canModify && selectedPO.status === 'PENDING' && (
+                <button
+                  onClick={() => handleApproveClick(selectedPO.id)}
+                  className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md font-medium transition"
+                >
+                  Approve Purchase Order
+                </button>
+              )}
               {canModify && (selectedPO.status === 'PENDING' || selectedPO.status === 'ORDERED') && (
                 <button
                   onClick={() => handleCancelClick(selectedPO.id)}

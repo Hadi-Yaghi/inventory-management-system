@@ -2,6 +2,7 @@ package com.project.code.Model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import java.util.Set;
 
 @Entity
 @Table(name = "users", uniqueConstraints = {
@@ -30,7 +31,35 @@ public class User {
     @Column(name = "auth_provider")
     private String authProvider = "LOCAL";
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "user_stores",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "store_id")
+    )
+    private Set<Store> assignedStores = new java.util.HashSet<>();
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "default_store_id")
+    private Store defaultStore;
+
     public User() {
+    }
+
+    public Set<Store> getAssignedStores() {
+        return assignedStores;
+    }
+
+    public void setAssignedStores(Set<Store> assignedStores) {
+        this.assignedStores = assignedStores;
+    }
+
+    public Store getDefaultStore() {
+        return defaultStore;
+    }
+
+    public void setDefaultStore(Store defaultStore) {
+        this.defaultStore = defaultStore;
     }
 
     public User(String username, String email, String passwordHash, Role role) {

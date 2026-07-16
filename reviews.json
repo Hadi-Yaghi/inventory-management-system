@@ -1,1752 +1,570 @@
 [
     {
+        "id": "rev001",
         "productId": 1,
-        "customerId": 45,
+        "customerId": 1,
         "storeId": 1,
         "rating": 5,
-        "comment": "Amazing laptop! Very fast and lightweight."
+        "title": "Excellent Smartphone",
+        "comment": "The Galaxy S21 is amazing! Very fast, great camera, and beautiful screen.",
+        "photoUrls": ["https://example.com/photos/galaxy_s21_1.jpg"],
+        "verifiedPurchase": true,
+        "likes": 5,
+        "replies": [
+            {
+                "authorId": "manager",
+                "text": "Thank you for your feedback, John! We are glad you love the phone.",
+                "createdAt": "2026-04-16T12:00:00"
+            }
+        ]
     },
     {
+        "id": "rev002",
         "productId": 1,
-        "customerId": 15,
+        "customerId": 2,
+        "storeId": 2,
+        "rating": 4,
+        "title": "Good phone, fast delivery",
+        "comment": "Bought it from Gadget Hub. The phone is solid, though battery life could be slightly better.",
+        "photoUrls": [],
+        "verifiedPurchase": false,
+        "likes": 2,
+        "replies": []
+    },
+    {
+        "id": "rev003",
+        "productId": 2,
+        "customerId": 2,
+        "storeId": 2,
+        "rating": 5,
+        "title": "Best iPhone ever",
+        "comment": "The iPhone 13 is absolutely brilliant. Extremely smooth performance and battery lasts all day.",
+        "photoUrls": ["https://example.com/photos/iphone13.jpg"],
+        "verifiedPurchase": true,
+        "likes": 10,
+        "replies": [
+            {
+                "authorId": "admin",
+                "text": "Thank you for sharing your experience, Jane! We appreciate your business.",
+                "createdAt": "2026-04-21T09:30:00"
+            }
+        ]
+    },
+    {
+        "id": "rev004",
+        "productId": 2,
+        "customerId": 3,
+        "storeId": 2,
+        "rating": 5,
+        "comment": "Switched from Android and I'm very happy. Camera quality is top notch.",
+        "title": "Superb Camera",
+        "photoUrls": [],
+        "verifiedPurchase": false,
+        "likes": 0,
+        "replies": []
+    },
+    {
+        "id": "rev005",
+        "productId": 3,
+        "customerId": 4,
         "storeId": 1,
         "rating": 4,
-        "comment": "Great product! Worth every penny."
+        "comment": "Nice smartwatch, but charging it daily is a bit of a chore. Great fitness tracking features.",
+        "title": "Solid smartwatch",
+        "photoUrls": [],
+        "verifiedPurchase": false,
+        "likes": 1,
+        "replies": []
     },
     {
-        "productId": 1,
-        "customerId": 78,
+        "id": "rev006",
+        "productId": 4,
+        "customerId": 1,
         "storeId": 1,
-        "rating": 3,
-        "comment": "The quality exceeded my expectations."
+        "rating": 5,
+        "comment": "Unbelievable noise cancelling. Perfect for office environments and flights.",
+        "title": "Incredible Noise Cancelling",
+        "photoUrls": [],
+        "verifiedPurchase": true,
+        "likes": 8,
+        "replies": [
+            {
+                "authorId": "manager",
+                "text": "We are thrilled to hear that, John! Enjoy the silence.",
+                "createdAt": "2026-04-16T14:00:00"
+            }
+        ]
     },
     {
-        "productId": 1,
-        "customerId": 25,
+        "id": "rev007",
+        "productId": 5,
+        "customerId": 5,
         "storeId": 1,
-        "rating": 2,
-        "comment": "Would definitely recommend to others."
+        "rating": 5,
+        "comment": "The best developer laptop out there. Screen is sharp and keyboard feels great.",
+        "title": "Perfect Laptop",
+        "photoUrls": [],
+        "verifiedPurchase": false,
+        "likes": 4,
+        "replies": []
     },
     {
-        "productId": 1,
+        "id": "rev008",
+        "productId": 6,
+        "customerId": 3,
+        "storeId": 3,
+        "rating": 5,
+        "comment": "Powerful suction, easy to maneuver. Makes cleaning a breeze.",
+        "title": "Dyson does it again",
+        "photoUrls": [],
+        "verifiedPurchase": true,
+        "likes": 3,
+        "replies": []
+    },
+    {
+        "id": "rev009",
+        "productId": 7,
+        "customerId": 9,
+        "storeId": 4,
+        "rating": 4,
+        "comment": "Helps with my allergies. Very quiet even on high settings.",
+        "title": "Breathing much easier",
+        "photoUrls": [],
+        "verifiedPurchase": true,
+        "likes": 2,
+        "replies": []
+    },
+    {
+        "id": "rev010",
+        "productId": 8,
+        "customerId": 10,
+        "storeId": 5,
+        "rating": 4,
+        "comment": "Great espresso quickly, but the pods can be expensive in the long run.",
+        "title": "Quick and Tasty Coffee",
+        "photoUrls": [],
+        "verifiedPurchase": true,
+        "likes": 1,
+        "replies": []
+    },
+    {
+        "id": "rev011",
+        "productId": 9,
+        "customerId": 11,
+        "storeId": 1,
+        "rating": 5,
+        "comment": "A true barista experience at home. Highly customizable settings.",
+        "title": "Exceptional Espresso Machine",
+        "photoUrls": ["https://example.com/photos/espresso_setup.jpg"],
+        "verifiedPurchase": true,
+        "likes": 12,
+        "replies": [
+            {
+                "authorId": "manager",
+                "text": "Thank you for the wonderful review, Daniel! Happy brewing!",
+                "createdAt": "2026-06-26T11:00:00"
+            }
+        ]
+    },
+    {
+        "id": "rev012",
+        "productId": 10,
         "customerId": 12,
-        "storeId": 1,
-        "rating": 1,
-        "comment": "Not as expected. The performance is subpar."
-    },
-    {
-        "productId": 11,
-        "customerId": 38,
-        "storeId": 1,
-        "rating": 5,
-        "comment": "Satisfactory, but I was hoping for better features."
-    },
-    {
-        "productId": 11,
-        "customerId": 99,
-        "storeId": 1,
-        "rating": 4,
-        "comment": "Great value for money!"
-    },
-    {
-        "productId": 11,
-        "customerId": 10,
-        "storeId": 1,
-        "rating": 5,
-        "comment": "Highly recommend it. Best purchase ever!"
-    },
-    {
-        "productId": 11,
-        "customerId": 66,
-        "storeId": 1,
-        "rating": 3,
-        "comment": "The laptop is great for gaming."
-    },
-    {
-        "productId": 11,
-        "customerId": 53,
-        "storeId": 1,
-        "rating": 4,
-        "comment": "It\u2019s okay, but there are better options out there."
-    },
-    {
-        "productId": 21,
-        "customerId": 7,
-        "storeId": 1,
-        "rating": 5,
-        "comment": "Amazing laptop! Very fast and lightweight."
-    },
-    {
-        "productId": 21,
-        "customerId": 88,
-        "storeId": 1,
-        "rating": 2,
-        "comment": "Great product! Worth every penny."
-    },
-    {
-        "productId": 21,
-        "customerId": 54,
-        "storeId": 1,
-        "rating": 3,
-        "comment": "The quality exceeded my expectations."
-    },
-    {
-        "productId": 21,
-        "customerId": 13,
-        "storeId": 1,
-        "rating": 4,
-        "comment": "Would definitely recommend to others."
-    },
-    {
-        "productId": 21,
-        "customerId": 60,
-        "storeId": 1,
-        "rating": 1,
-        "comment": "Not as expected. The performance is subpar."
-    },
-    {
-        "productId": 31,
-        "customerId": 9,
-        "storeId": 1,
-        "rating": 4,
-        "comment": "Satisfactory, but I was hoping for better features."
-    },
-    {
-        "productId": 31,
-        "customerId": 85,
-        "storeId": 1,
-        "rating": 5,
-        "comment": "Great value for money!"
-    },
-    {
-        "productId": 31,
-        "customerId": 35,
-        "storeId": 1,
-        "rating": 5,
-        "comment": "Highly recommend it. Best purchase ever!"
-    },
-    {
-        "productId": 31,
-        "customerId": 72,
-        "storeId": 1,
-        "rating": 3,
-        "comment": "The laptop is great for gaming."
-    },
-    {
-        "productId": 31,
-        "customerId": 22,
-        "storeId": 1,
-        "rating": 4,
-        "comment": "It\u2019s okay, but there are better options out there."
-    },
-    {
-        "productId": 41,
-        "customerId": 16,
-        "storeId": 1,
-        "rating": 5,
-        "comment": "Amazing laptop! Very fast and lightweight."
-    },
-    {
-        "productId": 41,
-        "customerId": 34,
-        "storeId": 1,
-        "rating": 2,
-        "comment": "Great product! Worth every penny."
-    },
-    {
-        "productId": 41,
-        "customerId": 49,
-        "storeId": 1,
-        "rating": 3,
-        "comment": "The quality exceeded my expectations."
-    },
-    {
-        "productId": 41,
-        "customerId": 28,
-        "storeId": 1,
-        "rating": 4,
-        "comment": "Would definitely recommend to others."
-    },
-    {
-        "productId": 41,
-        "customerId": 42,
-        "storeId": 1,
-        "rating": 1,
-        "comment": "Not as expected. The performance is subpar."
-    },
-    {
-        "productId": 2,
-        "customerId": 38,
-        "storeId": 2,
-        "rating": 5,
-        "comment": "Satisfactory, but I was hoping for better features."
-    },
-    {
-        "productId": 2,
-        "customerId": 99,
-        "storeId": 2,
-        "rating": 4,
-        "comment": "Great value for money!"
-    },
-    {
-        "productId": 2,
-        "customerId": 10,
-        "storeId": 2,
-        "rating": 5,
-        "comment": "Highly recommend it. Best purchase ever!"
-    },
-    {
-        "productId": 2,
-        "customerId": 66,
         "storeId": 2,
         "rating": 3,
-        "comment": "The laptop is great for gaming."
+        "comment": "Washes well, but the spin cycle can be quite loud.",
+        "title": "Decent washing machine",
+        "photoUrls": [],
+        "verifiedPurchase": true,
+        "likes": 0,
+        "replies": []
     },
     {
-        "productId": 2,
-        "customerId": 53,
-        "storeId": 2,
-        "rating": 4,
-        "comment": "It\u2019s okay, but there are better options out there."
-    },
-    {
-        "productId": 12,
+        "id": "rev013",
+        "productId": 11,
         "customerId": 7,
         "storeId": 2,
         "rating": 5,
-        "comment": "Amazing laptop! Very fast and lightweight."
+        "comment": "The leather is premium quality and the fit is perfect.",
+        "title": "Stunning Jacket",
+        "photoUrls": [],
+        "verifiedPurchase": true,
+        "likes": 6,
+        "replies": []
     },
     {
+        "id": "rev014",
         "productId": 12,
-        "customerId": 88,
-        "storeId": 2,
-        "rating": 2,
-        "comment": "Great product! Worth every penny."
-    },
-    {
-        "productId": 12,
-        "customerId": 54,
-        "storeId": 2,
-        "rating": 3,
-        "comment": "The quality exceeded my expectations."
-    },
-    {
-        "productId": 12,
-        "customerId": 13,
-        "storeId": 2,
-        "rating": 4,
-        "comment": "Would definitely recommend to others."
-    },
-    {
-        "productId": 12,
-        "customerId": 60,
-        "storeId": 2,
-        "rating": 1,
-        "comment": "Not as expected. The performance is subpar."
-    },
-    {
-        "productId": 22,
-        "customerId": 9,
-        "storeId": 2,
-        "rating": 4,
-        "comment": "Satisfactory, but I was hoping for better features."
-    },
-    {
-        "productId": 22,
-        "customerId": 85,
-        "storeId": 2,
-        "rating": 5,
-        "comment": "Great value for money!"
-    },
-    {
-        "productId": 22,
-        "customerId": 35,
-        "storeId": 2,
-        "rating": 5,
-        "comment": "Highly recommend it. Best purchase ever!"
-    },
-    {
-        "productId": 22,
-        "customerId": 72,
-        "storeId": 2,
-        "rating": 3,
-        "comment": "The laptop is great for gaming."
-    },
-    {
-        "productId": 22,
-        "customerId": 22,
-        "storeId": 2,
-        "rating": 4,
-        "comment": "It\u2019s okay, but there are better options out there."
-    },
-    {
-        "productId": 32,
-        "customerId": 16,
-        "storeId": 2,
-        "rating": 5,
-        "comment": "Amazing laptop! Very fast and lightweight."
-    },
-    {
-        "productId": 32,
-        "customerId": 34,
-        "storeId": 2,
-        "rating": 2,
-        "comment": "Great product! Worth every penny."
-    },
-    {
-        "productId": 32,
-        "customerId": 49,
-        "storeId": 2,
-        "rating": 3,
-        "comment": "The quality exceeded my expectations."
-    },
-    {
-        "productId": 32,
-        "customerId": 28,
-        "storeId": 2,
-        "rating": 4,
-        "comment": "Would definitely recommend to others."
-    },
-    {
-        "productId": 32,
-        "customerId": 42,
-        "storeId": 2,
-        "rating": 1,
-        "comment": "Not as expected. The performance is subpar."
-    },
-    {
-        "productId": 42,
-        "customerId": 63,
-        "storeId": 2,
-        "rating": 4,
-        "comment": "Satisfactory, but I was hoping for better features."
-    },
-    {
-        "productId": 42,
-        "customerId": 39,
-        "storeId": 2,
-        "rating": 5,
-        "comment": "Great value for money!"
-    },
-    {
-        "productId": 42,
-        "customerId": 51,
-        "storeId": 2,
-        "rating": 5,
-        "comment": "Highly recommend it. Best purchase ever!"
-    },
-    {
-        "productId": 42,
         "customerId": 8,
+        "storeId": 3,
+        "rating": 4,
+        "comment": "Extremely comfortable for running. Good arch support.",
+        "title": "Great running shoes",
+        "photoUrls": [],
+        "verifiedPurchase": true,
+        "likes": 2,
+        "replies": []
+    },
+    {
+        "id": "rev015",
+        "productId": 13,
+        "customerId": 2,
         "storeId": 2,
-        "rating": 3,
-        "comment": "The laptop is great for gaming."
+        "rating": 4,
+        "comment": "A classic fit, well-made and durable material.",
+        "title": "Good classic jeans",
+        "photoUrls": [],
+        "verifiedPurchase": false,
+        "likes": 1,
+        "replies": []
     },
     {
-        "productId": 42,
-        "customerId": 21,
+        "id": "rev016",
+        "productId": 14,
+        "customerId": 5,
+        "storeId": 2,
+        "rating": 5,
+        "comment": "Very light and breathable. Perfect for warm summer days.",
+        "title": "Lovely dress!",
+        "photoUrls": [],
+        "verifiedPurchase": false,
+        "likes": 0,
+        "replies": []
+    },
+    {
+        "id": "rev017",
+        "productId": 15,
+        "customerId": 4,
+        "storeId": 1,
+        "rating": 5,
+        "comment": "The bible of algorithms. Essential for computer science students.",
+        "title": "Ultimate Algorithms Reference",
+        "photoUrls": [],
+        "verifiedPurchase": true,
+        "likes": 15,
+        "replies": [
+            {
+                "authorId": "admin",
+                "text": "Glad this classic is serving you well, Alice!",
+                "createdAt": "2026-07-11T18:00:00"
+            }
+        ]
+    },
+    {
+        "id": "rev018",
+        "productId": 16,
+        "customerId": 5,
+        "storeId": 2,
+        "rating": 5,
+        "comment": "A masterpiece. Read it to my kids and they loved it.",
+        "title": "Timeless Classic",
+        "photoUrls": [],
+        "verifiedPurchase": true,
+        "likes": 3,
+        "replies": []
+    },
+    {
+        "id": "rev019",
+        "productId": 17,
+        "customerId": 4,
+        "storeId": 4,
+        "rating": 4,
+        "comment": "Great practices, though some chapters feel slightly opinionated. Still a must-read.",
+        "title": "Must read for developers",
+        "photoUrls": [],
+        "verifiedPurchase": true,
+        "likes": 9,
+        "replies": []
+    },
+    {
+        "id": "rev020",
+        "productId": 18,
+        "customerId": 6,
+        "storeId": 3,
+        "rating": 4,
+        "comment": "Solid frame and good suspension. Handles trails nicely.",
+        "title": "Great mountain bike",
+        "photoUrls": [],
+        "verifiedPurchase": false,
+        "likes": 1,
+        "replies": []
+    },
+    {
+        "id": "rev021",
+        "productId": 19,
+        "customerId": 6,
+        "storeId": 1,
+        "rating": 5,
+        "comment": "Very easy to set up. Withstood a heavy rainstorm with no leaks.",
+        "title": "Extremely reliable tent",
+        "photoUrls": [],
+        "verifiedPurchase": true,
+        "likes": 5,
+        "replies": []
+    },
+    {
+        "id": "rev022",
+        "productId": 20,
+        "customerId": 7,
+        "storeId": 3,
+        "rating": 3,
+        "comment": "It is okay, but could be a bit thicker for better cushioning.",
+        "title": "Average yoga mat",
+        "photoUrls": [],
+        "verifiedPurchase": false,
+        "likes": 0,
+        "replies": []
+    },
+    {
+        "id": "rev023",
+        "productId": 21,
+        "customerId": 5,
+        "storeId": 5,
+        "rating": 5,
+        "comment": "An absolute joy to build! The details are incredible.",
+        "title": "Epic Lego set!",
+        "photoUrls": ["https://example.com/photos/lego_millennium_completed.jpg"],
+        "verifiedPurchase": true,
+        "likes": 20,
+        "replies": [
+            {
+                "authorId": "manager",
+                "text": "It is indeed one of our best sellers, Bob! Glad you enjoyed the build.",
+                "createdAt": "2026-05-16T10:00:00"
+            }
+        ]
+    },
+    {
+        "id": "rev024",
+        "productId": 22,
+        "customerId": 8,
+        "storeId": 1,
+        "rating": 4,
+        "comment": "Classic family game. Kids love it, though games can drag on for too long.",
+        "title": "Fun family times",
+        "photoUrls": [],
+        "verifiedPurchase": false,
+        "likes": 1,
+        "replies": []
+    },
+    {
+        "id": "rev025",
+        "productId": 23,
+        "customerId": 1,
+        "storeId": 3,
+        "rating": 5,
+        "comment": "Teeth feel dentist-clean every time. Battery life is fantastic.",
+        "title": "Excellent toothbrush",
+        "photoUrls": [],
+        "verifiedPurchase": true,
+        "likes": 3,
+        "replies": []
+    },
+    {
+        "id": "rev026",
+        "productId": 24,
+        "customerId": 2,
+        "storeId": 4,
+        "rating": 4,
+        "comment": "A very fresh, pleasant scent. Perfect for daily wear.",
+        "title": "Lovely daily scent",
+        "photoUrls": [],
+        "verifiedPurchase": true,
+        "likes": 2,
+        "replies": []
+    },
+    {
+        "id": "rev027",
+        "productId": 25,
+        "customerId": 3,
+        "storeId": 5,
+        "rating": 5,
+        "comment": "Solved my cold start issues immediately. Holds charge perfectly.",
+        "title": "Reliable car battery",
+        "photoUrls": [],
+        "verifiedPurchase": true,
+        "likes": 4,
+        "replies": []
+    },
+    {
+        "id": "rev028",
+        "productId": 1,
+        "customerId": 8,
+        "storeId": 1,
+        "rating": 4,
+        "comment": "Great display and smooth scrolling. Recommended.",
+        "title": "Nice screen",
+        "photoUrls": [],
+        "verifiedPurchase": false,
+        "likes": 0,
+        "replies": []
+    },
+    {
+        "id": "rev029",
+        "productId": 2,
+        "customerId": 9,
+        "storeId": 3,
+        "rating": 5,
+        "comment": "Simply the best smartphone on the market. Extremely fast.",
+        "title": "Amazing performance",
+        "photoUrls": [],
+        "verifiedPurchase": false,
+        "likes": 1,
+        "replies": []
+    },
+    {
+        "id": "rev030",
+        "productId": 6,
+        "customerId": 10,
+        "storeId": 5,
+        "rating": 5,
+        "comment": "Worth every single dollar. Cleans pet hair like nothing else.",
+        "title": "Must have for pet owners",
+        "photoUrls": [],
+        "verifiedPurchase": false,
+        "likes": 5,
+        "replies": []
+    },
+    {
+        "id": "rev031",
+        "productId": 9,
+        "customerId": 12,
+        "storeId": 6,
+        "rating": 5,
+        "comment": "Amazing build quality. Professional level espresso.",
+        "title": "Fabulous machine",
+        "photoUrls": [],
+        "verifiedPurchase": false,
+        "likes": 0,
+        "replies": []
+    },
+    {
+        "id": "rev032",
+        "productId": 11,
+        "customerId": 1,
         "storeId": 2,
         "rating": 4,
-        "comment": "It\u2019s okay, but there are better options out there."
+        "comment": "Stylish and warm, but slightly tight around the shoulders.",
+        "title": "Sleek style",
+        "photoUrls": [],
+        "verifiedPurchase": false,
+        "likes": 1,
+        "replies": []
     },
     {
-        "productId": 3,
-        "customerId": 7,
-        "storeId": 3,
-        "rating": 5,
-        "comment": "Amazing laptop! Very fast and lightweight."
-    },
-    {
-        "productId": 3,
-        "customerId": 88,
-        "storeId": 3,
-        "rating": 2,
-        "comment": "Great product! Worth every penny."
-    },
-    {
-        "productId": 3,
-        "customerId": 54,
-        "storeId": 3,
-        "rating": 3,
-        "comment": "The quality exceeded my expectations."
-    },
-    {
-        "productId": 3,
-        "customerId": 13,
-        "storeId": 3,
-        "rating": 4,
-        "comment": "Would definitely recommend to others."
-    },
-    {
-        "productId": 3,
-        "customerId": 60,
-        "storeId": 3,
-        "rating": 1,
-        "comment": "Not as expected. The performance is subpar."
-    },
-    {
-        "productId": 13,
-        "customerId": 38,
-        "storeId": 3,
-        "rating": 5,
-        "comment": "Satisfactory, but I was hoping for better features."
-    },
-    {
-        "productId": 13,
-        "customerId": 99,
-        "storeId": 3,
-        "rating": 4,
-        "comment": "Great value for money!"
-    },
-    {
-        "productId": 13,
-        "customerId": 10,
-        "storeId": 3,
-        "rating": 5,
-        "comment": "Highly recommend it. Best purchase ever!"
-    },
-    {
-        "productId": 13,
-        "customerId": 66,
-        "storeId": 3,
-        "rating": 3,
-        "comment": "The laptop is great for gaming."
-    },
-    {
-        "productId": 13,
-        "customerId": 53,
-        "storeId": 3,
-        "rating": 4,
-        "comment": "It\u2019s okay, but there are better options out there."
-    },
-    {
-        "productId": 23,
-        "customerId": 7,
-        "storeId": 3,
-        "rating": 5,
-        "comment": "Amazing laptop! Very fast and lightweight."
-    },
-    {
-        "productId": 23,
-        "customerId": 88,
-        "storeId": 3,
-        "rating": 2,
-        "comment": "Great product! Worth every penny."
-    },
-    {
-        "productId": 23,
-        "customerId": 54,
-        "storeId": 3,
-        "rating": 3,
-        "comment": "The quality exceeded my expectations."
-    },
-    {
-        "productId": 23,
-        "customerId": 13,
-        "storeId": 3,
-        "rating": 4,
-        "comment": "Would definitely recommend to others."
-    },
-    {
-        "productId": 23,
-        "customerId": 60,
-        "storeId": 3,
-        "rating": 1,
-        "comment": "Not as expected. The performance is subpar."
-    },
-    {
-        "productId": 33,
-        "customerId": 9,
-        "storeId": 3,
-        "rating": 4,
-        "comment": "Satisfactory, but I was hoping for better features."
-    },
-    {
-        "productId": 33,
-        "customerId": 85,
-        "storeId": 3,
-        "rating": 5,
-        "comment": "Great value for money!"
-    },
-    {
-        "productId": 33,
-        "customerId": 35,
-        "storeId": 3,
-        "rating": 5,
-        "comment": "Highly recommend it. Best purchase ever!"
-    },
-    {
-        "productId": 33,
-        "customerId": 72,
-        "storeId": 3,
-        "rating": 3,
-        "comment": "The laptop is great for gaming."
-    },
-    {
-        "productId": 33,
-        "customerId": 22,
-        "storeId": 3,
-        "rating": 4,
-        "comment": "It\u2019s okay, but there are better options out there."
-    },
-    {
-        "productId": 43,
-        "customerId": 16,
-        "storeId": 3,
-        "rating": 5,
-        "comment": "Amazing laptop! Very fast and lightweight."
-    },
-    {
-        "productId": 43,
-        "customerId": 34,
-        "storeId": 3,
-        "rating": 2,
-        "comment": "Great product! Worth every penny."
-    },
-    {
-        "productId": 43,
-        "customerId": 49,
-        "storeId": 3,
-        "rating": 3,
-        "comment": "The quality exceeded my expectations."
-    },
-    {
-        "productId": 43,
-        "customerId": 28,
-        "storeId": 3,
-        "rating": 4,
-        "comment": "Would definitely recommend to others."
-    },
-    {
-        "productId": 43,
-        "customerId": 42,
-        "storeId": 3,
-        "rating": 1,
-        "comment": "Not as expected. The performance is subpar."
-    },
-    {
-        "productId": 4,
-        "customerId": 7,
-        "storeId": 4,
-        "rating": 5,
-        "comment": "Amazing laptop! Very fast and lightweight."
-    },
-    {
-        "productId": 4,
-        "customerId": 88,
-        "storeId": 4,
-        "rating": 2,
-        "comment": "Great product! Worth every penny."
-    },
-    {
-        "productId": 4,
-        "customerId": 54,
-        "storeId": 4,
-        "rating": 3,
-        "comment": "The quality exceeded my expectations."
-    },
-    {
-        "productId": 4,
-        "customerId": 13,
-        "storeId": 4,
-        "rating": 4,
-        "comment": "Would definitely recommend to others."
-    },
-    {
-        "productId": 4,
-        "customerId": 60,
-        "storeId": 4,
-        "rating": 1,
-        "comment": "Not as expected. The performance is subpar."
-    },
-    {
-        "productId": 14,
-        "customerId": 38,
-        "storeId": 4,
-        "rating": 5,
-        "comment": "Satisfactory, but I was hoping for better features."
-    },
-    {
-        "productId": 14,
-        "customerId": 99,
-        "storeId": 4,
-        "rating": 4,
-        "comment": "Great value for money!"
-    },
-    {
-        "productId": 14,
-        "customerId": 10,
-        "storeId": 4,
-        "rating": 5,
-        "comment": "Highly recommend it. Best purchase ever!"
-    },
-    {
-        "productId": 14,
-        "customerId": 66,
-        "storeId": 4,
-        "rating": 3,
-        "comment": "The laptop is great for gaming."
-    },
-    {
-        "productId": 14,
-        "customerId": 53,
-        "storeId": 4,
-        "rating": 4,
-        "comment": "It\u2019s okay, but there are better options out there."
-    },
-    {
-        "productId": 24,
-        "customerId": 7,
-        "storeId": 4,
-        "rating": 5,
-        "comment": "Amazing laptop! Very fast and lightweight."
-    },
-    {
-        "productId": 24,
-        "customerId": 88,
-        "storeId": 4,
-        "rating": 2,
-        "comment": "Great product! Worth every penny."
-    },
-    {
-        "productId": 24,
-        "customerId": 54,
-        "storeId": 4,
-        "rating": 3,
-        "comment": "The quality exceeded my expectations."
-    },
-    {
-        "productId": 24,
-        "customerId": 13,
-        "storeId": 4,
-        "rating": 4,
-        "comment": "Would definitely recommend to others."
-    },
-    {
-        "productId": 24,
-        "customerId": 60,
-        "storeId": 4,
-        "rating": 1,
-        "comment": "Not as expected. The performance is subpar."
-    },
-    {
-        "productId": 34,
-        "customerId": 9,
-        "storeId": 4,
-        "rating": 4,
-        "comment": "Satisfactory, but I was hoping for better features."
-    },
-    {
-        "productId": 34,
-        "customerId": 85,
-        "storeId": 4,
-        "rating": 5,
-        "comment": "Great value for money!"
-    },
-    {
-        "productId": 34,
-        "customerId": 35,
-        "storeId": 4,
-        "rating": 5,
-        "comment": "Highly recommend it. Best purchase ever!"
-    },
-    {
-        "productId": 34,
-        "customerId": 72,
-        "storeId": 4,
-        "rating": 3,
-        "comment": "The laptop is great for gaming."
-    },
-    {
-        "productId": 34,
-        "customerId": 22,
-        "storeId": 4,
-        "rating": 4,
-        "comment": "It\u2019s okay, but there are better options out there."
-    },
-    {
-        "productId": 44,
-        "customerId": 16,
-        "storeId": 4,
-        "rating": 5,
-        "comment": "Amazing laptop! Very fast and lightweight."
-    },
-    {
-        "productId": 44,
-        "customerId": 34,
-        "storeId": 4,
-        "rating": 2,
-        "comment": "Great product! Worth every penny."
-    },
-    {
-        "productId": 44,
-        "customerId": 49,
-        "storeId": 4,
-        "rating": 3,
-        "comment": "The quality exceeded my expectations."
-    },
-    {
-        "productId": 44,
-        "customerId": 28,
-        "storeId": 4,
-        "rating": 4,
-        "comment": "Would definitely recommend to others."
-    },
-    {
-        "productId": 44,
-        "customerId": 42,
-        "storeId": 4,
-        "rating": 1,
-        "comment": "Not as expected. The performance is subpar."
-    },
-    {
-        "productId": 5,
-        "customerId": 7,
-        "storeId": 5,
-        "rating": 5,
-        "comment": "Amazing laptop! Very fast and lightweight."
-    },
-    {
-        "productId": 5,
-        "customerId": 88,
-        "storeId": 5,
-        "rating": 2,
-        "comment": "Great product! Worth every penny."
-    },
-    {
-        "productId": 5,
-        "customerId": 54,
-        "storeId": 5,
-        "rating": 3,
-        "comment": "The quality exceeded my expectations."
-    },
-    {
-        "productId": 5,
-        "customerId": 13,
-        "storeId": 5,
-        "rating": 4,
-        "comment": "Would definitely recommend to others."
-    },
-    {
-        "productId": 5,
-        "customerId": 60,
-        "storeId": 5,
-        "rating": 1,
-        "comment": "Not as expected. The performance is subpar."
-    },
-    {
+        "id": "rev033",
         "productId": 15,
-        "customerId": 38,
-        "storeId": 5,
+        "customerId": 2,
+        "storeId": 1,
         "rating": 5,
-        "comment": "Satisfactory, but I was hoping for better features."
+        "comment": "In-depth, clear explanations. Every programmer needs this book.",
+        "title": "A CS Masterpiece",
+        "photoUrls": [],
+        "verifiedPurchase": false,
+        "likes": 3,
+        "replies": []
     },
     {
-        "productId": 15,
-        "customerId": 99,
-        "storeId": 5,
-        "rating": 4,
-        "comment": "Great value for money!"
-    },
-    {
-        "productId": 15,
-        "customerId": 10,
-        "storeId": 5,
-        "rating": 5,
-        "comment": "Highly recommend it. Best purchase ever!"
-    },
-    {
-        "productId": 15,
-        "customerId": 66,
-        "storeId": 5,
-        "rating": 3,
-        "comment": "The laptop is great for gaming."
-    },
-    {
-        "productId": 15,
-        "customerId": 53,
-        "storeId": 5,
-        "rating": 4,
-        "comment": "It\u2019s okay, but there are better options out there."
-    },
-    {
-        "productId": 25,
-        "customerId": 7,
-        "storeId": 5,
-        "rating": 5,
-        "comment": "Amazing laptop! Very fast and lightweight."
-    },
-    {
-        "productId": 25,
-        "customerId": 88,
-        "storeId": 5,
-        "rating": 2,
-        "comment": "Great product! Worth every penny."
-    },
-    {
-        "productId": 25,
-        "customerId": 54,
-        "storeId": 5,
-        "rating": 3,
-        "comment": "The quality exceeded my expectations."
-    },
-    {
-        "productId": 25,
-        "customerId": 13,
-        "storeId": 5,
-        "rating": 4,
-        "comment": "Would definitely recommend to others."
-    },
-    {
-        "productId": 25,
-        "customerId": 60,
-        "storeId": 5,
-        "rating": 1,
-        "comment": "Not as expected. The performance is subpar."
-    },
-    {
-        "productId": 35,
-        "customerId": 9,
-        "storeId": 5,
-        "rating": 4,
-        "comment": "Satisfactory, but I was hoping for better features."
-    },
-    {
-        "productId": 35,
-        "customerId": 85,
-        "storeId": 5,
-        "rating": 5,
-        "comment": "Great value for money!"
-    },
-    {
-        "productId": 35,
-        "customerId": 35,
-        "storeId": 5,
-        "rating": 5,
-        "comment": "Highly recommend it. Best purchase ever!"
-    },
-    {
-        "productId": 35,
-        "customerId": 72,
-        "storeId": 5,
-        "rating": 3,
-        "comment": "The laptop is great for gaming."
-    },
-    {
-        "productId": 35,
-        "customerId": 22,
-        "storeId": 5,
-        "rating": 4,
-        "comment": "It\u2019s okay, but there are better options out there."
-    },
-    {
-        "productId": 45,
-        "customerId": 16,
-        "storeId": 5,
-        "rating": 5,
-        "comment": "Amazing laptop! Very fast and lightweight."
-    },
-    {
-        "productId": 45,
-        "customerId": 34,
-        "storeId": 5,
-        "rating": 2,
-        "comment": "Great product! Worth every penny."
-    },
-    {
-        "productId": 45,
-        "customerId": 49,
-        "storeId": 5,
-        "rating": 3,
-        "comment": "The quality exceeded my expectations."
-    },
-    {
-        "productId": 45,
-        "customerId": 28,
-        "storeId": 5,
-        "rating": 4,
-        "comment": "Would definitely recommend to others."
-    },
-    {
-        "productId": 45,
-        "customerId": 42,
-        "storeId": 5,
-        "rating": 1,
-        "comment": "Not as expected. The performance is subpar."
-    },
-    {
-        "productId": 6,
-        "customerId": 7,
-        "storeId": 6,
-        "rating": 5,
-        "comment": "Amazing laptop! Very fast and lightweight."
-    },
-    {
-        "productId": 6,
-        "customerId": 88,
-        "storeId": 6,
-        "rating": 2,
-        "comment": "Great product! Worth every penny."
-    },
-    {
-        "productId": 6,
-        "customerId": 54,
-        "storeId": 6,
-        "rating": 3,
-        "comment": "The quality exceeded my expectations."
-    },
-    {
-        "productId": 6,
-        "customerId": 13,
-        "storeId": 6,
-        "rating": 4,
-        "comment": "Would definitely recommend to others."
-    },
-    {
-        "productId": 6,
-        "customerId": 60,
-        "storeId": 6,
-        "rating": 1,
-        "comment": "Not as expected. The performance is subpar."
-    },
-    {
-        "productId": 16,
-        "customerId": 38,
-        "storeId": 6,
-        "rating": 5,
-        "comment": "Satisfactory, but I was hoping for better features."
-    },
-    {
-        "productId": 16,
-        "customerId": 99,
-        "storeId": 6,
-        "rating": 4,
-        "comment": "Great value for money!"
-    },
-    {
-        "productId": 16,
-        "customerId": 10,
-        "storeId": 6,
-        "rating": 5,
-        "comment": "Highly recommend it. Best purchase ever!"
-    },
-    {
-        "productId": 16,
-        "customerId": 66,
-        "storeId": 6,
-        "rating": 3,
-        "comment": "The laptop is great for gaming."
-    },
-    {
-        "productId": 16,
-        "customerId": 53,
-        "storeId": 6,
-        "rating": 4,
-        "comment": "It\u2019s okay, but there are better options out there."
-    },
-    {
-        "productId": 26,
-        "customerId": 7,
-        "storeId": 6,
-        "rating": 5,
-        "comment": "Amazing laptop! Very fast and lightweight."
-    },
-    {
-        "productId": 26,
-        "customerId": 88,
-        "storeId": 6,
-        "rating": 2,
-        "comment": "Great product! Worth every penny."
-    },
-    {
-        "productId": 26,
-        "customerId": 54,
-        "storeId": 6,
-        "rating": 3,
-        "comment": "The quality exceeded my expectations."
-    },
-    {
-        "productId": 26,
-        "customerId": 13,
-        "storeId": 6,
-        "rating": 4,
-        "comment": "Would definitely recommend to others."
-    },
-    {
-        "productId": 26,
-        "customerId": 60,
-        "storeId": 6,
-        "rating": 1,
-        "comment": "Not as expected. The performance is subpar."
-    },
-    {
-        "productId": 36,
-        "customerId": 9,
-        "storeId": 6,
-        "rating": 4,
-        "comment": "Satisfactory, but I was hoping for better features."
-    },
-    {
-        "productId": 36,
-        "customerId": 85,
-        "storeId": 6,
-        "rating": 5,
-        "comment": "Great value for money!"
-    },
-    {
-        "productId": 36,
-        "customerId": 35,
-        "storeId": 6,
-        "rating": 5,
-        "comment": "Highly recommend it. Best purchase ever!"
-    },
-    {
-        "productId": 36,
-        "customerId": 72,
-        "storeId": 6,
-        "rating": 3,
-        "comment": "The laptop is great for gaming."
-    },
-    {
-        "productId": 36,
-        "customerId": 22,
-        "storeId": 6,
-        "rating": 4,
-        "comment": "It\u2019s okay, but there are better options out there."
-    },
-    {
-        "productId": 46,
-        "customerId": 16,
-        "storeId": 6,
-        "rating": 5,
-        "comment": "Amazing laptop! Very fast and lightweight."
-    },
-    {
-        "productId": 46,
-        "customerId": 34,
-        "storeId": 6,
-        "rating": 2,
-        "comment": "Great product! Worth every penny."
-    },
-    {
-        "productId": 46,
-        "customerId": 49,
-        "storeId": 6,
-        "rating": 3,
-        "comment": "The quality exceeded my expectations."
-    },
-    {
-        "productId": 46,
-        "customerId": 28,
-        "storeId": 6,
-        "rating": 4,
-        "comment": "Would definitely recommend to others."
-    },
-    {
-        "productId": 46,
-        "customerId": 42,
-        "storeId": 6,
-        "rating": 1,
-        "comment": "Not as expected. The performance is subpar."
-    },
-    {
-        "productId": 7,
-        "customerId": 7,
-        "storeId": 7,
-        "rating": 5,
-        "comment": "Amazing laptop! Very fast and lightweight."
-    },
-    {
-        "productId": 7,
-        "customerId": 88,
-        "storeId": 7,
-        "rating": 2,
-        "comment": "Great product! Worth every penny."
-    },
-    {
-        "productId": 7,
-        "customerId": 54,
-        "storeId": 7,
-        "rating": 3,
-        "comment": "The quality exceeded my expectations."
-    },
-    {
-        "productId": 7,
-        "customerId": 13,
-        "storeId": 7,
-        "rating": 4,
-        "comment": "Would definitely recommend to others."
-    },
-    {
-        "productId": 7,
-        "customerId": 60,
-        "storeId": 7,
-        "rating": 1,
-        "comment": "Not as expected. The performance is subpar."
-    },
-    {
+        "id": "rev034",
         "productId": 17,
-        "customerId": 38,
-        "storeId": 7,
+        "customerId": 3,
+        "storeId": 1,
         "rating": 5,
-        "comment": "Satisfactory, but I was hoping for better features."
+        "comment": "Changed the way I write code. Beautiful layout and examples.",
+        "title": "Life changing book",
+        "photoUrls": [],
+        "verifiedPurchase": false,
+        "likes": 7,
+        "replies": []
     },
     {
-        "productId": 17,
-        "customerId": 99,
-        "storeId": 7,
-        "rating": 4,
-        "comment": "Great value for money!"
-    },
-    {
-        "productId": 17,
-        "customerId": 10,
-        "storeId": 7,
-        "rating": 5,
-        "comment": "Highly recommend it. Best purchase ever!"
-    },
-    {
-        "productId": 17,
-        "customerId": 66,
-        "storeId": 7,
-        "rating": 3,
-        "comment": "The laptop is great for gaming."
-    },
-    {
-        "productId": 17,
-        "customerId": 53,
-        "storeId": 7,
-        "rating": 4,
-        "comment": "It\u2019s okay, but there are better options out there."
-    },
-    {
-        "productId": 27,
-        "customerId": 7,
-        "storeId": 7,
-        "rating": 5,
-        "comment": "Amazing laptop! Very fast and lightweight."
-    },
-    {
-        "productId": 27,
-        "customerId": 88,
-        "storeId": 7,
-        "rating": 2,
-        "comment": "Great product! Worth every penny."
-    },
-    {
-        "productId": 27,
-        "customerId": 54,
-        "storeId": 7,
-        "rating": 3,
-        "comment": "The quality exceeded my expectations."
-    },
-    {
-        "productId": 27,
-        "customerId": 13,
-        "storeId": 7,
-        "rating": 4,
-        "comment": "Would definitely recommend to others."
-    },
-    {
-        "productId": 27,
-        "customerId": 60,
-        "storeId": 7,
-        "rating": 1,
-        "comment": "Not as expected. The performance is subpar."
-    },
-    {
-        "productId": 37,
-        "customerId": 9,
-        "storeId": 7,
-        "rating": 4,
-        "comment": "Satisfactory, but I was hoping for better features."
-    },
-    {
-        "productId": 37,
-        "customerId": 85,
-        "storeId": 7,
-        "rating": 5,
-        "comment": "Great value for money!"
-    },
-    {
-        "productId": 37,
-        "customerId": 35,
-        "storeId": 7,
-        "rating": 5,
-        "comment": "Highly recommend it. Best purchase ever!"
-    },
-    {
-        "productId": 37,
-        "customerId": 72,
-        "storeId": 7,
-        "rating": 3,
-        "comment": "The laptop is great for gaming."
-    },
-    {
-        "productId": 37,
-        "customerId": 22,
-        "storeId": 7,
-        "rating": 4,
-        "comment": "It\u2019s okay, but there are better options out there."
-    },
-    {
-        "productId": 47,
-        "customerId": 16,
-        "storeId": 7,
-        "rating": 5,
-        "comment": "Amazing laptop! Very fast and lightweight."
-    },
-    {
-        "productId": 47,
-        "customerId": 34,
-        "storeId": 7,
-        "rating": 2,
-        "comment": "Great product! Worth every penny."
-    },
-    {
-        "productId": 47,
-        "customerId": 49,
-        "storeId": 7,
-        "rating": 3,
-        "comment": "The quality exceeded my expectations."
-    },
-    {
-        "productId": 47,
-        "customerId": 28,
-        "storeId": 7,
-        "rating": 4,
-        "comment": "Would definitely recommend to others."
-    },
-    {
-        "productId": 47,
-        "customerId": 42,
-        "storeId": 7,
-        "rating": 1,
-        "comment": "Not as expected. The performance is subpar."
-    },
-    {
-        "productId": 8,
-        "customerId": 7,
-        "storeId": 8,
-        "rating": 5,
-        "comment": "Amazing laptop! Very fast and lightweight."
-    },
-    {
-        "productId": 8,
-        "customerId": 88,
-        "storeId": 8,
-        "rating": 2,
-        "comment": "Great product! Worth every penny."
-    },
-    {
-        "productId": 8,
-        "customerId": 54,
-        "storeId": 8,
-        "rating": 3,
-        "comment": "The quality exceeded my expectations."
-    },
-    {
-        "productId": 8,
-        "customerId": 13,
-        "storeId": 8,
-        "rating": 4,
-        "comment": "Would definitely recommend to others."
-    },
-    {
-        "productId": 8,
-        "customerId": 60,
-        "storeId": 8,
-        "rating": 1,
-        "comment": "Not as expected. The performance is subpar."
-    },
-    {
-        "productId": 18,
-        "customerId": 38,
-        "storeId": 8,
-        "rating": 5,
-        "comment": "Satisfactory, but I was hoping for better features."
-    },
-    {
-        "productId": 18,
-        "customerId": 99,
-        "storeId": 8,
-        "rating": 4,
-        "comment": "Great value for money!"
-    },
-    {
+        "id": "rev035",
         "productId": 18,
         "customerId": 10,
-        "storeId": 8,
+        "storeId": 3,
         "rating": 5,
-        "comment": "Highly recommend it. Best purchase ever!"
+        "comment": "Great tires and sturdy build. Shifts gears very cleanly.",
+        "title": "Very pleased",
+        "photoUrls": [],
+        "verifiedPurchase": false,
+        "likes": 2,
+        "replies": []
     },
     {
-        "productId": 18,
-        "customerId": 66,
-        "storeId": 8,
-        "rating": 3,
-        "comment": "The laptop is great for gaming."
+        "id": "rev036",
+        "productId": 21,
+        "customerId": 11,
+        "storeId": 2,
+        "rating": 5,
+        "comment": "The best Lego set ever made. Huge size and super fun to build.",
+        "title": "Lego masterpiece",
+        "photoUrls": [],
+        "verifiedPurchase": false,
+        "likes": 11,
+        "replies": []
     },
     {
-        "productId": 18,
-        "customerId": 53,
-        "storeId": 8,
+        "id": "rev037",
+        "productId": 23,
+        "customerId": 12,
+        "storeId": 2,
         "rating": 4,
-        "comment": "It\u2019s okay, but there are better options out there."
+        "comment": "Cleans really well, but replacement heads are slightly costly.",
+        "title": "Cleans well",
+        "photoUrls": [],
+        "verifiedPurchase": false,
+        "likes": 0,
+        "replies": []
     },
     {
-        "productId": 28,
+        "id": "rev038",
+        "productId": 25,
+        "customerId": 5,
+        "storeId": 3,
+        "rating": 4,
+        "comment": "Very solid battery, fits perfectly in my sedan. Starts up easily.",
+        "title": "Good battery",
+        "photoUrls": [],
+        "verifiedPurchase": false,
+        "likes": 0,
+        "replies": []
+    },
+    {
+        "id": "rev039",
+        "productId": 1,
+        "customerId": 6,
+        "storeId": 1,
+        "rating": 2,
+        "comment": "The phone keeps lagging and the screen gets hot after 15 mins of video call.",
+        "title": "Disappointing",
+        "photoUrls": [],
+        "verifiedPurchase": false,
+        "likes": 8,
+        "replies": [
+            {
+                "authorId": "manager",
+                "text": "Hello Mary, please contact our support at support@example.com for a diagnostic check.",
+                "createdAt": "2026-05-23T11:00:00"
+            }
+        ]
+    },
+    {
+        "id": "rev040",
+        "productId": 2,
         "customerId": 7,
-        "storeId": 8,
-        "rating": 5,
-        "comment": "Amazing laptop! Very fast and lightweight."
-    },
-    {
-        "productId": 28,
-        "customerId": 88,
-        "storeId": 8,
-        "rating": 2,
-        "comment": "Great product! Worth every penny."
-    },
-    {
-        "productId": 28,
-        "customerId": 54,
-        "storeId": 8,
-        "rating": 3,
-        "comment": "The quality exceeded my expectations."
-    },
-    {
-        "productId": 28,
-        "customerId": 13,
-        "storeId": 8,
-        "rating": 4,
-        "comment": "Would definitely recommend to others."
-    },
-    {
-        "productId": 28,
-        "customerId": 60,
-        "storeId": 8,
+        "storeId": 3,
         "rating": 1,
-        "comment": "Not as expected. The performance is subpar."
-    },
-    {
-        "productId": 38,
-        "customerId": 9,
-        "storeId": 8,
-        "rating": 4,
-        "comment": "Satisfactory, but I was hoping for better features."
-    },
-    {
-        "productId": 38,
-        "customerId": 85,
-        "storeId": 8,
-        "rating": 5,
-        "comment": "Great value for money!"
-    },
-    {
-        "productId": 38,
-        "customerId": 35,
-        "storeId": 8,
-        "rating": 5,
-        "comment": "Highly recommend it. Best purchase ever!"
-    },
-    {
-        "productId": 38,
-        "customerId": 72,
-        "storeId": 8,
-        "rating": 3,
-        "comment": "The laptop is great for gaming."
-    },
-    {
-        "productId": 38,
-        "customerId": 22,
-        "storeId": 8,
-        "rating": 4,
-        "comment": "It\u2019s okay, but there are better options out there."
-    },
-    {
-        "productId": 48,
-        "customerId": 16,
-        "storeId": 8,
-        "rating": 5,
-        "comment": "Amazing laptop! Very fast and lightweight."
-    },
-    {
-        "productId": 48,
-        "customerId": 34,
-        "storeId": 8,
-        "rating": 2,
-        "comment": "Great product! Worth every penny."
-    },
-    {
-        "productId": 48,
-        "customerId": 49,
-        "storeId": 8,
-        "rating": 3,
-        "comment": "The quality exceeded my expectations."
-    },
-    {
-        "productId": 48,
-        "customerId": 28,
-        "storeId": 8,
-        "rating": 4,
-        "comment": "Would definitely recommend to others."
-    },
-    {
-        "productId": 48,
-        "customerId": 42,
-        "storeId": 8,
-        "rating": 1,
-        "comment": "Not as expected. The performance is subpar."
-    },
-    {
-        "productId": 9,
-        "customerId": 7,
-        "storeId": 9,
-        "rating": 5,
-        "comment": "Amazing laptop! Very fast and lightweight."
-    },
-    {
-        "productId": 9,
-        "customerId": 88,
-        "storeId": 9,
-        "rating": 2,
-        "comment": "Great product! Worth every penny."
-    },
-    {
-        "productId": 9,
-        "customerId": 54,
-        "storeId": 9,
-        "rating": 3,
-        "comment": "The quality exceeded my expectations."
-    },
-    {
-        "productId": 9,
-        "customerId": 13,
-        "storeId": 9,
-        "rating": 4,
-        "comment": "Would definitely recommend to others."
-    },
-    {
-        "productId": 9,
-        "customerId": 60,
-        "storeId": 9,
-        "rating": 1,
-        "comment": "Not as expected. The performance is subpar."
-    },
-    {
-        "productId": 19,
-        "customerId": 38,
-        "storeId": 9,
-        "rating": 5,
-        "comment": "Satisfactory, but I was hoping for better features."
-    },
-    {
-        "productId": 19,
-        "customerId": 99,
-        "storeId": 9,
-        "rating": 4,
-        "comment": "Great value for money!"
-    },
-    {
-        "productId": 19,
-        "customerId": 10,
-        "storeId": 9,
-        "rating": 5,
-        "comment": "Highly recommend it. Best purchase ever!"
-    },
-    {
-        "productId": 19,
-        "customerId": 66,
-        "storeId": 9,
-        "rating": 3,
-        "comment": "The laptop is great for gaming."
-    },
-    {
-        "productId": 19,
-        "customerId": 53,
-        "storeId": 9,
-        "rating": 4,
-        "comment": "It\u2019s okay, but there are better options out there."
-    },
-    {
-        "productId": 29,
-        "customerId": 7,
-        "storeId": 9,
-        "rating": 5,
-        "comment": "Amazing laptop! Very fast and lightweight."
-    },
-    {
-        "productId": 29,
-        "customerId": 88,
-        "storeId": 9,
-        "rating": 2,
-        "comment": "Great product! Worth every penny."
-    },
-    {
-        "productId": 29,
-        "customerId": 54,
-        "storeId": 9,
-        "rating": 3,
-        "comment": "The quality exceeded my expectations."
-    },
-    {
-        "productId": 29,
-        "customerId": 13,
-        "storeId": 9,
-        "rating": 4,
-        "comment": "Would definitely recommend to others."
-    },
-    {
-        "productId": 29,
-        "customerId": 60,
-        "storeId": 9,
-        "rating": 1,
-        "comment": "Not as expected. The performance is subpar."
-    },
-    {
-        "productId": 39,
-        "customerId": 9,
-        "storeId": 9,
-        "rating": 4,
-        "comment": "Satisfactory, but I was hoping for better features."
-    },
-    {
-        "productId": 39,
-        "customerId": 85,
-        "storeId": 9,
-        "rating": 5,
-        "comment": "Great value for money!"
-    },
-    {
-        "productId": 39,
-        "customerId": 35,
-        "storeId": 9,
-        "rating": 5,
-        "comment": "Highly recommend it. Best purchase ever!"
-    },
-    {
-        "productId": 39,
-        "customerId": 72,
-        "storeId": 9,
-        "rating": 3,
-        "comment": "The laptop is great for gaming."
-    },
-    {
-        "productId": 39,
-        "customerId": 22,
-        "storeId": 9,
-        "rating": 4,
-        "comment": "It\u2019s okay, but there are better options out there."
-    },
-    {
-        "productId": 49,
-        "customerId": 16,
-        "storeId": 9,
-        "rating": 5,
-        "comment": "Amazing laptop! Very fast and lightweight."
-    },
-    {
-        "productId": 49,
-        "customerId": 34,
-        "storeId": 9,
-        "rating": 2,
-        "comment": "Great product! Worth every penny."
-    },
-    {
-        "productId": 49,
-        "customerId": 49,
-        "storeId": 9,
-        "rating": 3,
-        "comment": "The quality exceeded my expectations."
-    },
-    {
-        "productId": 49,
-        "customerId": 28,
-        "storeId": 9,
-        "rating": 4,
-        "comment": "Would definitely recommend to others."
-    },
-    {
-        "productId": 49,
-        "customerId": 42,
-        "storeId": 9,
-        "rating": 1,
-        "comment": "Not as expected. The performance is subpar."
-    },
-    {
-        "productId": 10,
-        "customerId": 7,
-        "storeId": 10,
-        "rating": 5,
-        "comment": "Amazing laptop! Very fast and lightweight."
-    },
-    {
-        "productId": 10,
-        "customerId": 88,
-        "storeId": 10,
-        "rating": 2,
-        "comment": "Great product! Worth every penny."
-    },
-    {
-        "productId": 10,
-        "customerId": 54,
-        "storeId": 10,
-        "rating": 3,
-        "comment": "The quality exceeded my expectations."
-    },
-    {
-        "productId": 10,
-        "customerId": 13,
-        "storeId": 10,
-        "rating": 4,
-        "comment": "Would definitely recommend to others."
-    },
-    {
-        "productId": 10,
-        "customerId": 60,
-        "storeId": 10,
-        "rating": 1,
-        "comment": "Not as expected. The performance is subpar."
-    },
-    {
-        "productId": 20,
-        "customerId": 38,
-        "storeId": 10,
-        "rating": 5,
-        "comment": "Satisfactory, but I was hoping for better features."
-    },
-    {
-        "productId": 20,
-        "customerId": 99,
-        "storeId": 10,
-        "rating": 4,
-        "comment": "Great value for money!"
-    },
-    {
-        "productId": 20,
-        "customerId": 10,
-        "storeId": 10,
-        "rating": 5,
-        "comment": "Highly recommend it. Best purchase ever!"
-    },
-    {
-        "productId": 20,
-        "customerId": 66,
-        "storeId": 10,
-        "rating": 3,
-        "comment": "The laptop is great for gaming."
-    },
-    {
-        "productId": 20,
-        "customerId": 53,
-        "storeId": 10,
-        "rating": 4,
-        "comment": "It\u2019s okay, but there are better options out there."
-    },
-    {
-        "productId": 30,
-        "customerId": 7,
-        "storeId": 10,
-        "rating": 5,
-        "comment": "Amazing laptop! Very fast and lightweight."
-    },
-    {
-        "productId": 30,
-        "customerId": 88,
-        "storeId": 10,
-        "rating": 2,
-        "comment": "Great product! Worth every penny."
-    },
-    {
-        "productId": 30,
-        "customerId": 54,
-        "storeId": 10,
-        "rating": 3,
-        "comment": "The quality exceeded my expectations."
-    },
-    {
-        "productId": 30,
-        "customerId": 13,
-        "storeId": 10,
-        "rating": 4,
-        "comment": "Would definitely recommend to others."
-    },
-    {
-        "productId": 30,
-        "customerId": 60,
-        "storeId": 10,
-        "rating": 1,
-        "comment": "Not as expected. The performance is subpar."
-    },
-    {
-        "productId": 40,
-        "customerId": 9,
-        "storeId": 10,
-        "rating": 4,
-        "comment": "Satisfactory, but I was hoping for better features."
-    },
-    {
-        "productId": 40,
-        "customerId": 85,
-        "storeId": 10,
-        "rating": 5,
-        "comment": "Great value for money!"
-    },
-    {
-        "productId": 40,
-        "customerId": 35,
-        "storeId": 10,
-        "rating": 5,
-        "comment": "Highly recommend it. Best purchase ever!"
-    },
-    {
-        "productId": 40,
-        "customerId": 72,
-        "storeId": 10,
-        "rating": 3,
-        "comment": "The laptop is great for gaming."
-    },
-    {
-        "productId": 40,
-        "customerId": 22,
-        "storeId": 10,
-        "rating": 4,
-        "comment": "It\u2019s okay, but there are better options out there."
-    },
-    {
-        "productId": 50,
-        "customerId": 16,
-        "storeId": 10,
-        "rating": 5,
-        "comment": "Amazing laptop! Very fast and lightweight."
-    },
-    {
-        "productId": 50,
-        "customerId": 34,
-        "storeId": 10,
-        "rating": 2,
-        "comment": "Great product! Worth every penny."
-    },
-    {
-        "productId": 50,
-        "customerId": 49,
-        "storeId": 10,
-        "rating": 3,
-        "comment": "The quality exceeded my expectations."
-    },
-    {
-        "productId": 50,
-        "customerId": 28,
-        "storeId": 10,
-        "rating": 4,
-        "comment": "Would definitely recommend to others."
-    },
-    {
-        "productId": 50,
-        "customerId": 42,
-        "storeId": 10,
-        "rating": 1,
-        "comment": "Not as expected. The performance is subpar."
+        "comment": "Received a refurbished phone inside a dirty box. Very poor customer experience.",
+        "title": "Horrible Experience",
+        "photoUrls": [],
+        "verifiedPurchase": false,
+        "likes": 15,
+        "replies": [
+            {
+                "authorId": "admin",
+                "text": "We apologize sincerely for this mixup, James. We are shipping a brand new replacement immediately.",
+                "createdAt": "2026-06-02T10:00:00"
+            }
+        ]
     }
 ]

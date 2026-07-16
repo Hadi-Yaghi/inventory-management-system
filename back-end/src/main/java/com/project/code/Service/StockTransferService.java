@@ -10,7 +10,10 @@ import com.project.code.Repo.StockTransferRepository;
 import com.project.code.Repo.StoreRepository;
 import com.project.code.exception.InsufficientStockException;
 import com.project.code.exception.NotFoundException;
+import com.project.code.event.StockTransferredEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,7 +35,14 @@ public class StockTransferService {
     @Autowired
     private StoreRepository storeRepository;
 
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
+    @Autowired
+    private com.project.code.security.SecurityService securityService;
+
     @Transactional
+    @CacheEvict(value = {"dashboard", "analytics"}, allEntries = true)
     public StockTransfer initiateTransfer(Long productId, Long fromStoreId, Long toStoreId, Integer quantity) {
         if (!productRepository.existsById(productId)) {
             throw new NotFoundException("Product not found with ID: " + productId);
@@ -44,15 +54,13 @@ public class StockTransferService {
             throw new NotFoundException("Destination store not found with ID: " + toStoreId);
         }
 
+        securityService.verifyStoreAccess(fromStoreId);
+
         Inventory sourceInv = inventoryRepository.findByProductIdAndStoreId(productId, fromStoreId);
         if (sourceInv == null || sourceInv.getStockLevel() < quantity) {
             throw new InsufficientStockException("Insufficient stock in source store inventory. Requested: " + quantity +
                     ", Available: " + (sourceInv != null ? sourceInv.getStockLevel() : 0));
         }
-
-        // Decrement source inventory stock level
-        sourceInv.setStockLevel(sourceInv.getStockLevel() - quantity);
-        inventoryRepository.save(sourceInv);
 
         StockTransfer transfer = new StockTransfer(
                 productId,
@@ -62,62 +70,62 @@ public class StockTransferService {
                 TransferStatus.PENDING,
                 LocalDateTime.now()
         );
+        transfer.setCreatedBy(securityService.getCurrentUser());
 
-        return transferRepository.save(transfer);
+        StockTransfer savedTransfer = transferRepository.save(transfer);
+        eventPublisher.publishEvent(new StockTransferredEvent(savedTransfer));
+        return savedTransfer;
     }
 
     @Transactional
+    @CacheEvict(value = {"dashboard", "analytics"}, allEntries = true)
     public StockTransfer confirmReceipt(Long transferId) {
         StockTransfer transfer = transferRepository.findById(transferId)
                 .orElseThrow(() -> new NotFoundException("Stock transfer record not found with ID: " + transferId));
+
+        securityService.verifyStoreAccess(transfer.getToStoreId());
 
         if (transfer.getStatus() != TransferStatus.PENDING) {
             throw new IllegalStateException("Transfer cannot be completed. Current status: " + transfer.getStatus());
         }
 
-        // Increment destination store inventory
-        Inventory destInv = inventoryRepository.findByProductIdAndStoreId(transfer.getProductId(), transfer.getToStoreId());
-        if (destInv == null) {
-            // Create new inventory record in destination store
-            Store toStore = storeRepository.findById(transfer.getToStoreId())
-                    .orElseThrow(() -> new NotFoundException("Store not found with ID: " + transfer.getToStoreId()));
-            destInv = new Inventory(
-                    productRepository.findByid(transfer.getProductId()),
-                    toStore,
-                    transfer.getQuantity()
-            );
-        } else {
-            destInv.setStockLevel(destInv.getStockLevel() + transfer.getQuantity());
-        }
-        inventoryRepository.save(destInv);
-
         transfer.setStatus(TransferStatus.COMPLETED);
         transfer.setCompletedAt(LocalDateTime.now());
-        return transferRepository.save(transfer);
+        transfer.setReceivedBy(securityService.getCurrentUser());
+        StockTransfer savedTransfer = transferRepository.save(transfer);
+        eventPublisher.publishEvent(new StockTransferredEvent(savedTransfer));
+        return savedTransfer;
     }
 
     @Transactional
+    @CacheEvict(value = {"dashboard", "analytics"}, allEntries = true)
     public StockTransfer cancelTransfer(Long transferId) {
         StockTransfer transfer = transferRepository.findById(transferId)
                 .orElseThrow(() -> new NotFoundException("Stock transfer record not found with ID: " + transferId));
+
+        securityService.verifyStoreAccess(transfer.getFromStoreId());
 
         if (transfer.getStatus() != TransferStatus.PENDING) {
             throw new IllegalStateException("Transfer cannot be cancelled. Current status: " + transfer.getStatus());
         }
 
-        // Return quantity to source store inventory
-        Inventory sourceInv = inventoryRepository.findByProductIdAndStoreId(transfer.getProductId(), transfer.getFromStoreId());
-        if (sourceInv != null) {
-            sourceInv.setStockLevel(sourceInv.getStockLevel() + transfer.getQuantity());
-            inventoryRepository.save(sourceInv);
-        }
-
         transfer.setStatus(TransferStatus.CANCELLED);
         transfer.setCompletedAt(LocalDateTime.now());
-        return transferRepository.save(transfer);
+        transfer.setApprovedBy(securityService.getCurrentUser());
+        transfer.setApprovedAt(LocalDateTime.now());
+        StockTransfer savedTransfer = transferRepository.save(transfer);
+        eventPublisher.publishEvent(new StockTransferredEvent(savedTransfer));
+        return savedTransfer;
     }
 
     public List<StockTransfer> getTransferHistory() {
-        return transferRepository.findAll();
+        if (securityService.isUserAdmin()) {
+            return transferRepository.findAll();
+        } else {
+            java.util.Set<Long> storeIds = securityService.getAssignedStoreIds();
+            return transferRepository.findAll().stream()
+                    .filter(t -> storeIds.contains(t.getFromStoreId()) || storeIds.contains(t.getToStoreId()))
+                    .collect(java.util.stream.Collectors.toList());
+        }
     }
 }

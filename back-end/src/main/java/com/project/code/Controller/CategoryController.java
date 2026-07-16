@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,6 +40,7 @@ public class CategoryController {
     @PostMapping
     @Operation(summary = "Create a category", description = "Create and save a new category. Accessible by ADMIN and MANAGER.")
     @ApiResponse(responseCode = "200", description = "Successfully created category")
+    @CacheEvict(value = "categories", allEntries = true)
     public ResponseEntity<Category> createCategory(@Valid @RequestBody Category category) {
         return ResponseEntity.ok(categoryRepository.save(category));
     }
@@ -46,6 +48,7 @@ public class CategoryController {
     @PutMapping
     @Operation(summary = "Update category", description = "Update an existing category's details. Accessible by ADMIN and MANAGER.")
     @ApiResponse(responseCode = "200", description = "Successfully updated category")
+    @CacheEvict(value = "categories", allEntries = true)
     public ResponseEntity<Category> updateCategory(@Valid @RequestBody Category category) {
         return ResponseEntity.ok(categoryRepository.save(category));
     }
@@ -54,6 +57,7 @@ public class CategoryController {
     @Operation(summary = "Delete category by ID", description = "Delete a category from the database. Accessible by ADMIN and MANAGER.")
     @ApiResponse(responseCode = "200", description = "Successfully deleted category")
     @ApiResponse(responseCode = "404", description = "Category not found")
+    @CacheEvict(value = "categories", allEntries = true)
     public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
         if (!categoryRepository.existsById(id)) {
             throw new com.project.code.exception.NotFoundException("Category not found with ID: " + id);

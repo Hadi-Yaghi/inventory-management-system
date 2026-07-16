@@ -45,12 +45,16 @@ public class PurchaseOrderController {
         return ResponseEntity.ok(response);
     }
 
+    @Autowired
+    private com.project.code.security.SecurityService securityService;
+
     @GetMapping("/{id}")
     @Operation(summary = "Get purchase order by ID", description = "Retrieve details of a specific purchase order by ID.")
     @ApiResponse(responseCode = "200", description = "Successfully retrieved purchase order")
     @ApiResponse(responseCode = "404", description = "Purchase order not found")
     public ResponseEntity<PurchaseOrder> getPurchaseOrderById(@PathVariable Long id) {
         PurchaseOrder po = purchaseOrderService.getPurchaseOrderById(id);
+        securityService.verifyStoreAccess(po.getStore().getId());
         return ResponseEntity.ok(po);
     }
 
@@ -61,6 +65,14 @@ public class PurchaseOrderController {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         PurchaseOrder createdPo = purchaseOrderService.createPurchaseOrder(dto, username);
         return ResponseEntity.ok(createdPo);
+    }
+
+    @PostMapping("/{id}/approve")
+    @Operation(summary = "Approve a purchase order", description = "Approve a pending purchase order. Accessible by ADMIN and MANAGER.")
+    @ApiResponse(responseCode = "200", description = "Purchase order approved successfully")
+    public ResponseEntity<PurchaseOrder> approvePurchaseOrder(@PathVariable Long id) {
+        PurchaseOrder approvedPo = purchaseOrderService.approvePurchaseOrder(id);
+        return ResponseEntity.ok(approvedPo);
     }
 
     @PostMapping("/{id}/receive")

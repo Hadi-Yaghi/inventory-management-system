@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,6 +40,7 @@ public class SupplierController {
     @PostMapping
     @Operation(summary = "Create a supplier", description = "Create and save a new supplier. Accessible by ADMIN and MANAGER.")
     @ApiResponse(responseCode = "200", description = "Successfully created supplier")
+    @CacheEvict(value = "suppliers", allEntries = true)
     public ResponseEntity<Supplier> createSupplier(@Valid @RequestBody Supplier supplier) {
         return ResponseEntity.ok(supplierRepository.save(supplier));
     }
@@ -46,6 +48,7 @@ public class SupplierController {
     @PutMapping
     @Operation(summary = "Update supplier", description = "Update an existing supplier's details. Accessible by ADMIN and MANAGER.")
     @ApiResponse(responseCode = "200", description = "Successfully updated supplier")
+    @CacheEvict(value = "suppliers", allEntries = true)
     public ResponseEntity<Supplier> updateSupplier(@Valid @RequestBody Supplier supplier) {
         return ResponseEntity.ok(supplierRepository.save(supplier));
     }
@@ -54,6 +57,7 @@ public class SupplierController {
     @Operation(summary = "Delete supplier by ID", description = "Delete a supplier from the database. Accessible by ADMIN and MANAGER.")
     @ApiResponse(responseCode = "200", description = "Successfully deleted supplier")
     @ApiResponse(responseCode = "404", description = "Supplier not found")
+    @CacheEvict(value = "suppliers", allEntries = true)
     public ResponseEntity<Void> deleteSupplier(@PathVariable Long id) {
         if (!supplierRepository.existsById(id)) {
             throw new com.project.code.exception.NotFoundException("Supplier not found with ID: " + id);

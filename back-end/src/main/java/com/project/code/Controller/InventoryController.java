@@ -3,8 +3,10 @@ package com.project.code.Controller;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,11 +42,21 @@ public class InventoryController {
     @Autowired
     private ServiceClass serviceClass;
 
+    @Autowired
+    private com.project.code.security.SecurityService securityService;
+
     @GetMapping
     @Operation(summary = "Get all inventory records", description = "Retrieve inventory records across all stores.")
     @ApiResponse(responseCode = "200", description = "Successfully retrieved inventory records")
     public List<Map<String, Object>> getAllInventory() {
-        return inventoryRepository.findAll().stream()
+        List<Inventory> all = inventoryRepository.findAll();
+        if (!securityService.isUserAdmin()) {
+            Set<Long> storeIds = securityService.getAssignedStoreIds();
+            all = all.stream()
+                    .filter(inv -> inv.getStore() != null && storeIds.contains(inv.getStore().getId()))
+                    .toList();
+        }
+        return all.stream()
                 .map(this::toInventoryResponse)
                 .toList();
     }
@@ -52,6 +64,7 @@ public class InventoryController {
     @PutMapping
     @Operation(summary = "Update inventory record", description = "Update stock level and associated product details in inventory. Accessible by ADMIN, MANAGER, and EMPLOYEE.")
     @ApiResponse(responseCode = "200", description = "Successfully updated product and inventory")
+    @CacheEvict(value = {"dashboard", "analytics", "products"}, allEntries = true)
     public Map<String, String> updateInventory(@RequestBody CombinedRequest request) {
         Product product = request.getProduct();
         Inventory inventory = request.getInventory();
@@ -94,6 +107,7 @@ public class InventoryController {
     @PostMapping
     @Operation(summary = "Add product to inventory", description = "Save a new product inventory record in a store. Accessible by ADMIN, MANAGER, and EMPLOYEE.")
     @ApiResponse(responseCode = "200", description = "Product added to inventory successfully")
+    @CacheEvict(value = {"dashboard", "analytics", "products"}, allEntries = true)
     public Map<String, String> saveInventory(@RequestBody Inventory inventory) {
 
         Map<String, String> map = new HashMap<>();
@@ -122,6 +136,7 @@ public class InventoryController {
     @Operation(summary = "Get all products in store inventory with pagination", description = "Retrieve a list of products in the store's inventory using pagination.")
     @ApiResponse(responseCode = "200", description = "Successfully retrieved inventory products")
     public Map<String, Object> getAllProducts(@PathVariable Long storeid, Pageable pageable) {
+        securityService.verifyStoreAccess(storeid);
         Map<String, Object> map = new HashMap<>();
         Page<Product> page = productRepository.findProductsByStoreId(storeid, pageable);
         map.put("products", page.getContent());
@@ -136,6 +151,7 @@ public class InventoryController {
     @ApiResponse(responseCode = "200", description = "Successfully retrieved filtered products")
     public Map<String, Object> getProductName(@PathVariable String category, @PathVariable String name,
             @PathVariable long storeid) {
+        securityService.verifyStoreAccess(storeid);
         Map<String, Object> map = new HashMap<>();
         if (category.equals("null")) {
             map.put("product", productRepository.findByNameLike(storeid, name));
@@ -153,6 +169,7 @@ public class InventoryController {
     @Operation(summary = "Search inventory products by name", description = "Retrieve products in a store matching a name query.")
     @ApiResponse(responseCode = "200", description = "Successfully retrieved search results")
     public Map<String, Object> searchProduct(@PathVariable String name, @PathVariable long storeId) {
+        securityService.verifyStoreAccess(storeId);
         Map<String, Object> map = new HashMap<>();
         map.put("product", productRepository.findByNameLike(storeId, name));
         return map;
@@ -161,6 +178,7 @@ public class InventoryController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Remove product from inventory by product ID", description = "Delete the inventory record for a product. Accessible by ADMIN and MANAGER.")
     @ApiResponse(responseCode = "200", description = "Successfully removed product from inventory")
+    @CacheEvict(value = {"dashboard", "analytics", "products"}, allEntries = true)
     public Map<String, String> removeProduct(@PathVariable Long id) {
         Map<String, String> map = new HashMap<>();
 
@@ -178,6 +196,7 @@ public class InventoryController {
     @ApiResponse(responseCode = "200", description = "True if stock level is sufficient, false otherwise")
     public boolean validateQuantity(@PathVariable int quantity, @PathVariable long storeId,
             @PathVariable long productId) {
+        securityService.verifyStoreAccess(storeId);
         Inventory result = inventoryRepository.findByProductIdAndStoreId(productId, storeId);
         if (result == null || result.getStockLevel() == null) {
             return false;
@@ -193,6 +212,7 @@ public class InventoryController {
     @Operation(summary = "Get low stock items for store", description = "Retrieve a list of inventory items for a store where the stock level is below the configured threshold.")
     @ApiResponse(responseCode = "200", description = "Successfully retrieved low stock items")
     public List<Inventory> getLowStockItems(@PathVariable Long storeId) {
+        securityService.verifyStoreAccess(storeId);
         return inventoryRepository.findLowStockByStoreId(storeId);
     }
 

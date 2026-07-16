@@ -24,3 +24,8 @@ export const cancelPurchaseOrder = async (id) => {
   const response = await api.post(`/purchase-orders/${id}/cancel`);
   return response.data;
 };
+
+export const approvePurchaseOrder = async (id) => {
+  const response = await api.post(`/purchase-orders/${id}/approve`);
+  return response.data;
+};

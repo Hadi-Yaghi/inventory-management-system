@@ -33,11 +33,20 @@ public class OrderController {
     @Autowired
     private OrderDetailsRepository orderDetailsRepository;
 
+    @Autowired
+    private com.project.code.security.SecurityService securityService;
+
     @GetMapping
     @Operation(summary = "Get all orders with pagination", description = "Retrieve a paginated list of orders.")
     @ApiResponse(responseCode = "200", description = "Orders retrieved successfully")
     public ResponseEntity<Map<String, Object>> getAllOrders(Pageable pageable) {
-        Page<OrderDetails> page = orderDetailsRepository.findAll(pageable);
+        Page<OrderDetails> page;
+        if (securityService.isUserAdmin()) {
+            page = orderDetailsRepository.findAll(pageable);
+        } else {
+            java.util.Set<Long> storeIds = securityService.getAssignedStoreIds();
+            page = orderDetailsRepository.findByStoreIdIn(storeIds, pageable);
+        }
         Map<String, Object> response = new HashMap<>();
         response.put("orders", page.getContent());
         response.put("currentPage", page.getNumber());
@@ -61,6 +70,7 @@ public class OrderController {
     @ApiResponse(responseCode = "200", description = "Invoice PDF generated successfully")
     public ResponseEntity<byte[]> downloadInvoice(@PathVariable Long id) {
         OrderDetails order = orderService.getOrderById(id);
+        securityService.verifyStoreAccess(order.getStore().getId());
         byte[] pdfBytes = pdfInvoiceService.generateInvoicePdf(order);
 
         HttpHeaders headers = new HttpHeaders();

@@ -22,12 +22,23 @@ export const getAccessToken = () => {
   return accessToken;
 };
 
-// Request interceptor to attach token
+// Request interceptor to attach token and active store context header
 api.interceptors.request.use(
   (config) => {
     const token = accessToken || localStorage.getItem('accessToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+    const activeStoreStr = localStorage.getItem('activeStore');
+    if (activeStoreStr) {
+      try {
+        const activeStore = JSON.parse(activeStoreStr);
+        if (activeStore && activeStore.id) {
+          config.headers['X-Active-Store-ID'] = activeStore.id;
+        }
+      } catch (e) {
+        // ignore
+      }
     }
     return config;
   },

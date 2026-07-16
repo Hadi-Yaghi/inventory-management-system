@@ -5,12 +5,12 @@ import { useAuth } from '../context/auth-context';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user, activeStore } = useAuth();
   const canViewAnalytics = user?.role === 'ADMIN' || user?.role === 'MANAGER';
 
   const { data, isLoading } = useQuery({
-    queryKey: ['analytics'],
-    queryFn: getAnalytics,
+    queryKey: ['analytics', activeStore?.id],
+    queryFn: () => getAnalytics(activeStore?.id),
     enabled: canViewAnalytics,
   });
 

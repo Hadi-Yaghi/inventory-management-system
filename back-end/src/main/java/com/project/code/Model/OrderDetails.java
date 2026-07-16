@@ -32,6 +32,10 @@ public class OrderDetails {
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus = OrderStatus.PENDING;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "created_by")
+    private User createdBy;
+
     public OrderDetails(Customer customer, Store store, double totalPrice, LocalDateTime date) {
         this.customer = customer;
         this.store = store;
@@ -97,5 +101,13 @@ public class OrderDetails {
 
     public void setOrderStatus(OrderStatus orderStatus) {
         this.orderStatus = orderStatus;
+    }
+
+    public User getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(User createdBy) {
+        this.createdBy = createdBy;
     }
 }

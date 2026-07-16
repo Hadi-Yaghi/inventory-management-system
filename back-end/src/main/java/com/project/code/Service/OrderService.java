@@ -5,7 +5,12 @@ import com.project.code.Model.*;
 import com.project.code.Repo.*;
 import com.project.code.exception.InsufficientStockException;
 import com.project.code.exception.NotFoundException;
+import com.project.code.event.OrderCreatedEvent;
+import com.project.code.event.OrderCompletedEvent;
+import com.project.code.event.OrderCancelledEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,13 +35,16 @@ public class OrderService {
     private OrderItemRepository orderItemRepository;
 
     @Autowired
-    private PdfInvoiceService pdfInvoiceService;
+    private ApplicationEventPublisher eventPublisher;
 
     @Autowired
-    private EmailService emailService;
+    private com.project.code.security.SecurityService securityService;
 
     @Transactional
+    @CacheEvict(value = {"dashboard", "analytics"}, allEntries = true)
     public void saveOrder(PlaceOrderRequestDTO placeOrderRequest){
+        securityService.verifyStoreAccess(placeOrderRequest.getStoreId());
+        
         List<PurchaseProductDTO> purchaseProducts = placeOrderRequest.getPurchaseProduct();
         if (purchaseProducts != null) {
             for (PurchaseProductDTO productDTO : purchaseProducts) {
@@ -72,6 +80,11 @@ public class OrderService {
         orderDetails.setTotalPrice(placeOrderRequest.getTotalPrice());
         orderDetails.setDate(java.time.LocalDateTime.now());
         orderDetails.setOrderStatus(OrderStatus.PENDING);
+        try {
+            orderDetails.setCreatedBy(securityService.getCurrentUser());
+        } catch (Exception e) {
+            // handle anonymous placing or similar if required, otherwise let it fall through
+        }
 
         orderDetails = orderDetailsRepository.save(orderDetails);
 
@@ -79,10 +92,6 @@ public class OrderService {
         if (purchaseProducts != null) {
             for (PurchaseProductDTO productDTO : purchaseProducts) {
                 OrderItem orderItem = new OrderItem();
-                Inventory inventory = inventoryRepository.findByProductIdAndStoreIdWithLock(productDTO.getId(),placeOrderRequest.getStoreId());
-                inventory.setReservedQuantity(inventory.getReservedQuantity() + productDTO.getQuantity());
-
-                inventoryRepository.save(inventory);
                 orderItem.setOrder(orderDetails);
                 orderItem.setProduct(productRepository.findByid(productDTO.getId()));
                 orderItem.setQuantity(productDTO.getQuantity());
@@ -93,19 +102,16 @@ public class OrderService {
         }
         orderDetails.setOrderItems(itemsList);
 
-        // Generate PDF Invoice and send email confirmation
-        try {
-            byte[] pdfBytes = pdfInvoiceService.generateInvoicePdf(orderDetails);
-            emailService.sendOrderConfirmation(orderDetails, pdfBytes);
-        } catch (Exception e) {
-            System.err.println("Could not generate or send PDF invoice: " + e.getMessage());
-        }
+        eventPublisher.publishEvent(new OrderCreatedEvent(orderDetails));
     }
 
     @Transactional
+    @CacheEvict(value = {"dashboard", "analytics"}, allEntries = true)
     public void transitionStatus(Long orderId, OrderStatus newStatus) {
         OrderDetails order = orderDetailsRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Order not found with ID: " + orderId));
+
+        securityService.verifyStoreAccess(order.getStore().getId());
 
         OrderStatus currentStatus = order.getOrderStatus();
         if (currentStatus == newStatus) {
@@ -130,35 +136,13 @@ public class OrderService {
         order.setOrderStatus(newStatus);
         orderDetailsRepository.save(order);
 
-        // If completed, convert reservation to actual deduction
         if (newStatus == OrderStatus.COMPLETED) {
-            List<OrderItem> items = order.getOrderItems();
-            if (items != null) {
-                for (OrderItem item : items) {
-                    Inventory inventory = inventoryRepository.findByProductIdAndStoreIdWithLock(
-                            item.getProduct().getId(), order.getStore().getId());
-                    if (inventory != null) {
-                        inventory.setStockLevel(Math.max(0, inventory.getStockLevel() - item.getQuantity()));
-                        inventory.setReservedQuantity(Math.max(0, inventory.getReservedQuantity() - item.getQuantity()));
-                        inventoryRepository.save(inventory);
-                    }
-                }
-            }
+            eventPublisher.publishEvent(new OrderCompletedEvent(order));
         }
 
         // If cancelling, release reservation
         if (newStatus == OrderStatus.CANCELLED) {
-            List<OrderItem> items = order.getOrderItems();
-            if (items != null) {
-                for (OrderItem item : items) {
-                    Inventory inventory = inventoryRepository.findByProductIdAndStoreIdWithLock(
-                            item.getProduct().getId(), order.getStore().getId());
-                    if (inventory != null) {
-                        inventory.setReservedQuantity(Math.max(0, inventory.getReservedQuantity() - item.getQuantity()));
-                        inventoryRepository.save(inventory);
-                    }
-                }
-            }
+            eventPublisher.publishEvent(new OrderCancelledEvent(order));
         }
     }
 

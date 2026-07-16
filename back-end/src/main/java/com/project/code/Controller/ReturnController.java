@@ -50,8 +50,13 @@ public class ReturnController {
 
     @GetMapping
     @Operation(summary = "Get all return requests", description = "Retrieve list of all return requests.")
-    public ResponseEntity<List<ReturnRequest>> getAllReturnRequests() {
-        List<ReturnRequest> requests = returnService.getAllReturnRequests();
+    public ResponseEntity<List<ReturnRequest>> getAllReturnRequests(@RequestParam(required = false) Long storeId) {
+        List<ReturnRequest> requests;
+        if (storeId != null) {
+            requests = returnService.getReturnRequestsForStore(storeId);
+        } else {
+            requests = returnService.getAllReturnRequests();
+        }
         return ResponseEntity.ok(requests);
     }
 }

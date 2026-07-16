@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -51,6 +53,7 @@ public class ProductController {
     @GetMapping("/search")
     @Operation(summary = "Search products with combined filters", description = "Query products by SKU, Category, Price range, Store availability, and minimum average rating from MongoDB reviews.")
     @ApiResponse(responseCode = "200", description = "Successfully retrieved search results")
+    @Cacheable(value = "products", key = "'search_' + (#sku?:'') + '_' + (#categoryId?:'') + '_' + (#minPrice?:'') + '_' + (#maxPrice?:'') + '_' + (#storeId?:'') + '_' + (#minRating?:'') + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
     public Map<String, Object> searchProducts(
             @RequestParam(required = false) String sku,
             @RequestParam(required = false) Long categoryId,
@@ -116,6 +119,7 @@ public class ProductController {
     @Operation(summary = "Add a new product", description = "Create and store a new product in the database. Accessible by ADMIN and MANAGER.")
     @ApiResponse(responseCode = "200", description = "Product added successfully")
     @ApiResponse(responseCode = "400", description = "Invalid product data or SKU already exists")
+    @CacheEvict(value = {"products", "dashboard", "analytics"}, allEntries = true)
     public Map<String, String> addProduct(@Valid @RequestBody Product product) {
 
         Map<String, String> map = new HashMap<>();
@@ -138,6 +142,7 @@ public class ProductController {
     @Operation(summary = "Get product by ID", description = "Retrieve product details by their database ID.")
     @ApiResponse(responseCode = "200", description = "Successfully retrieved product")
     @ApiResponse(responseCode = "404", description = "Product not found")
+    @Cacheable(value = "products", key = "#id")
     public Map<String, Object> getProductbyId(@PathVariable Long id) {
         Map<String, Object> map = new HashMap<>();
         Product result = productRepository.findByid(id);
@@ -151,6 +156,7 @@ public class ProductController {
     @PutMapping
     @Operation(summary = "Update product details", description = "Update details of an existing product in the database. Accessible by ADMIN and MANAGER.")
     @ApiResponse(responseCode = "200", description = "Product updated successfully")
+    @CacheEvict(value = {"products", "dashboard", "analytics"}, allEntries = true)
     public Map<String, String> updateProduct(@Valid @RequestBody Product product) {
         Map<String, String> map = new HashMap<>();
         try {
@@ -166,6 +172,7 @@ public class ProductController {
     @GetMapping("/category/{name}/{category}")
     @Operation(summary = "Filter products by category and name", description = "Filter products by matching subname and category.")
     @ApiResponse(responseCode = "200", description = "Successfully filtered products")
+    @Cacheable(value = "products", key = "'filter_' + #name + '_' + #category")
     public Map<String, Object> filterbyCategoryProduct(@PathVariable String name,@PathVariable String category) {
         Map<String, Object> map = new HashMap<>();
 
@@ -188,6 +195,7 @@ public class ProductController {
     @GetMapping
     @Operation(summary = "Get all products with pagination", description = "Retrieve a list of all products in the system using pagination.")
     @ApiResponse(responseCode = "200", description = "Successfully retrieved products")
+    @Cacheable(value = "products", key = "'list_' + #pageable.pageNumber + '_' + #pageable.pageSize")
     public Map<String, Object> listProduct(Pageable pageable) {
         Page<Product> page = productRepository.findAll(pageable);
         Map<String, Object> map = new HashMap<>();
@@ -204,6 +212,7 @@ public class ProductController {
     @GetMapping("filter/{category}/{storeid}")
     @Operation(summary = "Get products by category and store ID", description = "Get products matching a specific category in a specific store's inventory.")
     @ApiResponse(responseCode = "200", description = "Successfully retrieved products")
+    @Cacheable(value = "products", key = "'filter_cat_store_' + #category + '_' + #storeid")
     public Map<String, Object> getProductbyCategoryAndStoreId(@PathVariable String category,@PathVariable long storeid) {
         Map<String, Object> map = new HashMap<>();
         List<Product> result = productRepository.findProductByCategory(category,storeid);
@@ -216,6 +225,7 @@ public class ProductController {
     @Operation(summary = "Delete product by ID", description = "Delete a product and its associated inventory and order items from the system. Accessible by ADMIN and MANAGER.")
     @ApiResponse(responseCode = "200", description = "Successfully deleted product")
     @ApiResponse(responseCode = "404", description = "Product not found")
+    @CacheEvict(value = {"products", "dashboard", "analytics"}, allEntries = true)
     public Map<String, String> deleteProduct(@PathVariable Long id) {
         Map<String, String> map = new HashMap<>();
 
@@ -233,6 +243,7 @@ public class ProductController {
     @GetMapping("/searchProduct/{name}")
     @Operation(summary = "Search products by name", description = "Retrieve products matching a name pattern.")
     @ApiResponse(responseCode = "200", description = "Successfully retrieved search results")
+    @Cacheable(value = "products", key = "'search_name_' + #name")
     public Map<String, Object> searchProduct(@PathVariable String name) {
         Map<String, Object> map = new HashMap<>();
         map.put("products", productRepository.findProductBySubName(name));

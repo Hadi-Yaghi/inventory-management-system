@@ -7,7 +7,7 @@ import { useAuth } from '../context/auth-context';
 import { Search, Filter, Loader2, Plus, X, Trash2 } from 'lucide-react';
 
 const Orders = () => {
-  const { user } = useAuth();
+  const { user, activeStore } = useAuth();
   const queryClient = useQueryClient();
   const canManage = user?.role === 'ADMIN' || user?.role === 'MANAGER';
   const [updatingId, setUpdatingId] = useState(null);
@@ -21,10 +21,20 @@ const Orders = () => {
     items: [{ productId: '', quantity: 1, name: '', price: 0 }]
   });
 
+  React.useEffect(() => {
+    if (showPlaceOrder && activeStore) {
+      setOrderForm(f => ({ ...f, storeId: activeStore.id }));
+    }
+  }, [showPlaceOrder, activeStore]);
+
   const { data: orders, isLoading, isError } = useQuery({
-    queryKey: ['orders'],
+    queryKey: ['orders', activeStore?.id],
     queryFn: getOrders,
   });
+
+  const filteredOrders = orders?.filter(order => 
+    !activeStore || (order.store && order.store.id === activeStore.id)
+  );
 
   const { data: stores } = useQuery({
     queryKey: ['stores'],
@@ -192,7 +202,8 @@ const Orders = () => {
                   <select
                     value={orderForm.storeId}
                     onChange={(e) => setOrderForm({ ...orderForm, storeId: e.target.value })}
-                    className="w-full p-2.5 border border-slate-300 rounded-md bg-white outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                    disabled={activeStore !== null}
+                    className="w-full p-2.5 border border-slate-300 rounded-md bg-white outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 disabled:bg-slate-50 disabled:text-slate-500 font-medium"
                   >
                     <option value="">Select Store</option>
                     {stores?.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -356,26 +367,28 @@ const Orders = () => {
                 </tr>
               </thead>
               <tbody className="text-sm divide-y divide-slate-200">
-                {orders?.length === 0 ? (
+                {filteredOrders?.length === 0 ? (
                   <tr>
                     <td colSpan={canManage ? 6 : 5} className="p-8 text-center text-slate-500">
                       No orders found.
                     </td>
                   </tr>
                 ) : (
-                  orders?.map((order) => {
+                  filteredOrders?.map((order) => {
                     const actions = getNextActions(order.status);
+                    const orderDateVal = order.date || order.orderDate;
+                    const orderTotalVal = order.totalPrice ?? order.totalAmount ?? 0;
                     return (
                       <tr key={order.id} className="hover:bg-slate-50 transition">
                         <td className="p-4 font-medium text-indigo-600">#{order.id}</td>
                         <td className="p-4 text-slate-900">{order.customer?.name || 'Walk-in Customer'}</td>
-                        <td className="p-4 text-slate-600">{order.orderDate ? new Date(order.orderDate).toLocaleDateString() : 'N/A'}</td>
+                        <td className="p-4 text-slate-600">{orderDateVal ? new Date(orderDateVal).toLocaleDateString() : 'N/A'}</td>
                         <td className="p-4">
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
                             {order.status}
                           </span>
                         </td>
-                        <td className="p-4 text-slate-600">${order.totalAmount?.toFixed(2) || '0.00'}</td>
+                        <td className="p-4 text-slate-600">${orderTotalVal.toFixed(2)}</td>
                         {canManage && (
                           <td className="p-4 text-right space-x-2">
                             {updatingId === order.id ? (

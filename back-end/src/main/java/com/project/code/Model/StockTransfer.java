@@ -21,6 +21,20 @@ public class StockTransfer {
     private LocalDateTime requestedAt;
     private LocalDateTime completedAt;
 
+    @ManyToOne
+    @JoinColumn(name = "created_by")
+    private User createdBy;
+
+    @ManyToOne
+    @JoinColumn(name = "approved_by")
+    private User approvedBy;
+
+    @ManyToOne
+    @JoinColumn(name = "received_by")
+    private User receivedBy;
+
+    private LocalDateTime approvedAt;
+
     public StockTransfer() {}
 
     public StockTransfer(Long productId, Long fromStoreId, Long toStoreId, Integer quantity, TransferStatus status, LocalDateTime requestedAt) {
@@ -94,5 +108,37 @@ public class StockTransfer {
 
     public void setCompletedAt(LocalDateTime completedAt) {
         this.completedAt = completedAt;
+    }
+
+    public User getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(User createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public User getApprovedBy() {
+        return approvedBy;
+    }
+
+    public void setApprovedBy(User approvedBy) {
+        this.approvedBy = approvedBy;
+    }
+
+    public User getReceivedBy() {
+        return receivedBy;
+    }
+
+    public void setReceivedBy(User receivedBy) {
+        this.receivedBy = receivedBy;
+    }
+
+    public LocalDateTime getApprovedAt() {
+        return approvedAt;
+    }
+
+    public void setApprovedAt(LocalDateTime approvedAt) {
+        this.approvedAt = approvedAt;
     }
 }

@@ -7,6 +7,7 @@ import com.project.code.Service.ReportExportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
@@ -34,18 +35,48 @@ public class AnalyticsController {
     @Autowired
     private ReportExportService reportExportService;
 
+    @Autowired
+    private com.project.code.security.SecurityService securityService;
+
     // ═══════════════════════════════════════════════════════════════════════
     // DASHBOARD ANALYTICS
     // ═══════════════════════════════════════════════════════════════════════
 
+    private java.util.Collection<Long> getStoreFilter(Long storeId) {
+        if (storeId != null) {
+            securityService.verifyStoreAccess(storeId);
+            return java.util.Collections.singleton(storeId);
+        }
+        if (securityService.isUserAdmin()) {
+            return null;
+        }
+        return securityService.getAssignedStoreIds();
+    }
+
     @GetMapping
     @Operation(summary = "Get dashboard summary", description = "Returns top-level dashboard metrics.")
-    public ResponseEntity<Map<String, Object>> getDashboardSummary() {
-        Double revenue = orderDetailsRepository.getTotalRevenue(
-                LocalDate.of(2000, 1, 1).atStartOfDay(),
-                LocalDateTime.now());
-        List<Inventory> lowStock = inventoryRepository.findAllLowStock();
-        List<Object[]> counts = orderDetailsRepository.getOrderCountsByStatus();
+    public Map<String, Object> getDashboardSummary(@RequestParam(required = false) Long storeId) {
+        Double revenue;
+        List<Inventory> lowStock;
+        List<Object[]> counts;
+
+        java.util.Collection<Long> storeIds = getStoreFilter(storeId);
+        if (storeIds == null) {
+            revenue = orderDetailsRepository.getTotalRevenue(
+                    LocalDate.of(2000, 1, 1).atStartOfDay(),
+                    LocalDateTime.now());
+            lowStock = inventoryRepository.findAllLowStock();
+            counts = orderDetailsRepository.getOrderCountsByStatus();
+        } else {
+            revenue = orderDetailsRepository.getTotalRevenueForStores(
+                    LocalDate.of(2000, 1, 1).atStartOfDay(),
+                    LocalDateTime.now(),
+                    storeIds);
+            lowStock = inventoryRepository.findAllLowStock().stream()
+                    .filter(inv -> inv.getStore() != null && storeIds.contains(inv.getStore().getId()))
+                    .toList();
+            counts = orderDetailsRepository.getOrderCountsByStatusForStores(storeIds);
+        }
 
         long activeOrders = 0;
         Map<String, Object> ordersByStatus = new LinkedHashMap<>();
@@ -63,33 +94,51 @@ public class AnalyticsController {
         result.put("activeOrders", activeOrders);
         result.put("lowStockCount", lowStock.size());
         result.put("ordersByStatus", ordersByStatus);
-        return ResponseEntity.ok(result);
+        return result;
     }
 
     @GetMapping("/revenue")
     @Operation(summary = "Get total revenue", description = "Returns total revenue over a date range. Excludes cancelled orders.")
-    public ResponseEntity<Map<String, Object>> getTotalRevenue(
+    public Map<String, Object> getTotalRevenue(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(required = false) Long storeId) {
 
         LocalDateTime start = startDate.atStartOfDay();
         LocalDateTime end = endDate.atTime(23, 59, 59);
 
-        Double revenue = orderDetailsRepository.getTotalRevenue(start, end);
+        Double revenue;
+        java.util.Collection<Long> storeIds = getStoreFilter(storeId);
+        if (storeIds == null) {
+            revenue = orderDetailsRepository.getTotalRevenue(start, end);
+        } else {
+            revenue = orderDetailsRepository.getTotalRevenueForStores(start, end, storeIds);
+        }
+
         Map<String, Object> result = new HashMap<>();
         result.put("startDate", startDate.toString());
         result.put("endDate", endDate.toString());
         result.put("totalRevenue", revenue != null ? revenue : 0.0);
-        return ResponseEntity.ok(result);
+        return result;
     }
 
     @GetMapping("/top-selling")
     @Operation(summary = "Get top-selling products", description = "Returns top N products by quantity and by revenue.")
-    public ResponseEntity<Map<String, Object>> getTopSellingProducts(
-            @RequestParam(defaultValue = "10") int limit) {
+    public Map<String, Object> getTopSellingProducts(
+            @RequestParam(defaultValue = "10") int limit,
+            @RequestParam(required = false) Long storeId) {
 
-        List<Object[]> byQuantity = orderItemRepository.getTopSellingProductsByQuantity(PageRequest.of(0, limit));
-        List<Object[]> byRevenue = orderItemRepository.getTopSellingProductsByRevenue(PageRequest.of(0, limit));
+        List<Object[]> byQuantity;
+        List<Object[]> byRevenue;
+
+        java.util.Collection<Long> storeIds = getStoreFilter(storeId);
+        if (storeIds == null) {
+            byQuantity = orderItemRepository.getTopSellingProductsByQuantity(PageRequest.of(0, limit));
+            byRevenue = orderItemRepository.getTopSellingProductsByRevenue(PageRequest.of(0, limit));
+        } else {
+            byQuantity = orderItemRepository.getTopSellingProductsByQuantityForStores(storeIds, PageRequest.of(0, limit));
+            byRevenue = orderItemRepository.getTopSellingProductsByRevenueForStores(storeIds, PageRequest.of(0, limit));
+        }
 
         List<Map<String, Object>> qtyList = new ArrayList<>();
         for (Object[] row : byQuantity) {
@@ -112,13 +161,20 @@ public class AnalyticsController {
         Map<String, Object> result = new HashMap<>();
         result.put("topByQuantity", qtyList);
         result.put("topByRevenue", revList);
-        return ResponseEntity.ok(result);
+        return result;
     }
 
     @GetMapping("/low-stock")
     @Operation(summary = "Get low-stock items", description = "Returns all inventory items whose stock level is at or below the low-stock threshold, across all stores.")
-    public ResponseEntity<List<Map<String, Object>>> getLowStockItems() {
+    public List<Map<String, Object>> getLowStockItems(@RequestParam(required = false) Long storeId) {
         List<Inventory> lowStock = inventoryRepository.findAllLowStock();
+        java.util.Collection<Long> storeIds = getStoreFilter(storeId);
+        if (storeIds != null) {
+            lowStock = lowStock.stream()
+                    .filter(inv -> inv.getStore() != null && storeIds.contains(inv.getStore().getId()))
+                    .toList();
+        }
+
         List<Map<String, Object>> result = new ArrayList<>();
         for (Inventory inv : lowStock) {
             Map<String, Object> m = new HashMap<>();
@@ -129,18 +185,25 @@ public class AnalyticsController {
             m.put("threshold", inv.getLowStockThreshold());
             result.add(m);
         }
-        return ResponseEntity.ok(result);
+        return result;
     }
 
     @GetMapping("/orders-by-status")
     @Operation(summary = "Get order counts by status", description = "Returns the number of orders grouped by order status.")
-    public ResponseEntity<Map<String, Object>> getOrderCountsByStatus() {
-        List<Object[]> counts = orderDetailsRepository.getOrderCountsByStatus();
+    public Map<String, Object> getOrderCountsByStatus(@RequestParam(required = false) Long storeId) {
+        List<Object[]> counts;
+        java.util.Collection<Long> storeIds = getStoreFilter(storeId);
+        if (storeIds == null) {
+            counts = orderDetailsRepository.getOrderCountsByStatus();
+        } else {
+            counts = orderDetailsRepository.getOrderCountsByStatusForStores(storeIds);
+        }
+
         Map<String, Object> result = new LinkedHashMap<>();
         for (Object[] row : counts) {
             result.put(row[0] != null ? row[0].toString() : "UNKNOWN", row[1]);
         }
-        return ResponseEntity.ok(result);
+        return result;
     }
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -149,8 +212,16 @@ public class AnalyticsController {
 
     @GetMapping("/export/inventory")
     @Operation(summary = "Export inventory report", description = "Export inventory data as Excel, CSV, or PDF.")
-    public ResponseEntity<byte[]> exportInventory(@RequestParam(defaultValue = "excel") String format) throws Exception {
+    public ResponseEntity<byte[]> exportInventory(
+            @RequestParam(defaultValue = "excel") String format,
+            @RequestParam(required = false) Long storeId) throws Exception {
         List<Inventory> all = inventoryRepository.findAll();
+        java.util.Collection<Long> storeIds = getStoreFilter(storeId);
+        if (storeIds != null) {
+            all = all.stream()
+                    .filter(inv -> inv.getStore() != null && storeIds.contains(inv.getStore().getId()))
+                    .toList();
+        }
         return buildExportResponse(format, "inventory", all, null, null, null, null);
     }
 
@@ -158,21 +229,44 @@ public class AnalyticsController {
     @Operation(summary = "Export sales report", description = "Export sales data as Excel, CSV, or PDF.")
     public ResponseEntity<byte[]> exportSales(
             @RequestParam(defaultValue = "excel") String format,
-            @RequestParam(defaultValue = "20") int limit) throws Exception {
+            @RequestParam(defaultValue = "20") int limit,
+            @RequestParam(required = false) Long storeId) throws Exception {
 
-        List<Object[]> byQty = orderItemRepository.getTopSellingProductsByQuantity(PageRequest.of(0, limit));
-        List<Object[]> byRev = orderItemRepository.getTopSellingProductsByRevenue(PageRequest.of(0, limit));
-        Double totalRev = orderDetailsRepository.getTotalRevenue(
-                LocalDate.of(2000, 1, 1).atStartOfDay(),
-                LocalDateTime.now());
+        List<Object[]> byQty;
+        List<Object[]> byRev;
+        Double totalRev;
+
+        java.util.Collection<Long> storeIds = getStoreFilter(storeId);
+        if (storeIds == null) {
+            byQty = orderItemRepository.getTopSellingProductsByQuantity(PageRequest.of(0, limit));
+            byRev = orderItemRepository.getTopSellingProductsByRevenue(PageRequest.of(0, limit));
+            totalRev = orderDetailsRepository.getTotalRevenue(
+                    LocalDate.of(2000, 1, 1).atStartOfDay(),
+                    LocalDateTime.now());
+        } else {
+            byQty = orderItemRepository.getTopSellingProductsByQuantityForStores(storeIds, PageRequest.of(0, limit));
+            byRev = orderItemRepository.getTopSellingProductsByRevenueForStores(storeIds, PageRequest.of(0, limit));
+            totalRev = orderDetailsRepository.getTotalRevenueForStores(
+                    LocalDate.of(2000, 1, 1).atStartOfDay(),
+                    LocalDateTime.now(),
+                    storeIds);
+        }
 
         return buildExportResponse(format, "sales", null, byQty, byRev, totalRev, null);
     }
 
     @GetMapping("/export/customers")
     @Operation(summary = "Export customer report", description = "Export customer data as Excel, CSV, or PDF.")
-    public ResponseEntity<byte[]> exportCustomers(@RequestParam(defaultValue = "excel") String format) throws Exception {
-        List<Customer> customers = customerRepository.findAll();
+    public ResponseEntity<byte[]> exportCustomers(
+            @RequestParam(defaultValue = "excel") String format,
+            @RequestParam(required = false) Long storeId) throws Exception {
+        List<Customer> customers;
+        java.util.Collection<Long> storeIds = getStoreFilter(storeId);
+        if (storeIds == null) {
+            customers = customerRepository.findAll();
+        } else {
+            customers = customerRepository.findCustomersByStores(storeIds);
+        }
         return buildExportResponse(format, "customers", null, null, null, null, customers);
     }
 

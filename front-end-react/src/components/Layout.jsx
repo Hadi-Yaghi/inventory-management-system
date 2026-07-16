@@ -4,8 +4,19 @@ import { useAuth } from '../context/auth-context';
 import { LayoutDashboard, Package, Users, LogOut, Tags, Truck, FileText, Activity, RotateCcw, Star, Download, ShoppingCart } from 'lucide-react';
 
 const Layout = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, activeStore, changeActiveStore } = useAuth();
   const location = useLocation();
+  const [allStores, setAllStores] = React.useState([]);
+
+  React.useEffect(() => {
+    if (user?.role === 'ADMIN') {
+      import('../api/axios').then(({ default: api }) => {
+        api.get('/store')
+          .then(res => setAllStores(res.data))
+          .catch(err => console.error(err));
+      });
+    }
+  }, [user]);
 
   const navigation = [
     { name: 'Dashboard', href: '/', icon: LayoutDashboard, roles: ['ADMIN', 'MANAGER', 'EMPLOYEE'] },
@@ -54,6 +65,43 @@ const Layout = () => {
             {navigation.find(n => n.href === location.pathname)?.name || 'Dashboard'}
           </h2>
           <div className="flex items-center space-x-4">
+            {/* Store Dropdown selector */}
+            <div className="flex items-center space-x-2 mr-2">
+              <span className="text-xs text-slate-500 font-medium">Store:</span>
+              {user?.role === 'ADMIN' ? (
+                <select
+                  value={activeStore?.id || 'all'}
+                  onChange={(e) => {
+                    if (e.target.value === 'all') {
+                      changeActiveStore(null);
+                    } else {
+                      const selectedStore = allStores.find(s => s.id === parseInt(e.target.value));
+                      changeActiveStore(selectedStore);
+                    }
+                  }}
+                  className="text-sm border border-slate-200 rounded p-1 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 font-medium text-slate-700"
+                >
+                  <option value="all">All Stores (Global)</option>
+                  {allStores.map(s => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                </select>
+              ) : (
+                <select
+                  value={activeStore?.id || ''}
+                  onChange={(e) => {
+                    const selectedStore = user?.assignedStores?.find(s => s.id === parseInt(e.target.value));
+                    changeActiveStore(selectedStore);
+                  }}
+                  className="text-sm border border-slate-200 rounded p-1 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 font-medium text-slate-700"
+                >
+                  {user?.assignedStores?.map(s => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                </select>
+              )}
+            </div>
+
             <div className="flex items-center">
               <span className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold mr-2">
                 {user?.username?.[0]?.toUpperCase()}

@@ -6,14 +6,14 @@ import { Package, Plus, Search, Trash2, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Products = () => {
-  const { user } = useAuth();
+  const { user, activeStore } = useAuth();
   const queryClient = useQueryClient();
   const canMutate = user?.role === 'ADMIN' || user?.role === 'MANAGER';
   const [deletingId, setDeletingId] = useState(null);
   const [error, setError] = useState('');
 
   const { data: products, isLoading, isError } = useQuery({
-    queryKey: ['products'],
+    queryKey: ['products', activeStore?.id],
     queryFn: getProducts,
   });
 

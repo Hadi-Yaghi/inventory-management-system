@@ -1,6 +1,9 @@
 import api from './axios';
 
-export const getReturns = async () => (await api.get('/returns')).data;
+export const getReturns = async (storeId) => {
+  const params = storeId ? { storeId } : {};
+  return (await api.get('/returns', { params })).data;
+};
 export const getReviews = async () => {
   const response = await api.get('/reviews');
   return response.data.reviews || response.data;
@@ -10,7 +13,10 @@ export const getActivityLogs = async () => {
   const response = await api.get('/admin/activity-logs');
   return response.data.logs || response.data;
 };
-export const getAnalytics = async () => (await api.get('/analytics')).data;
+export const getAnalytics = async (storeId) => {
+  const params = storeId ? { storeId } : {};
+  return (await api.get('/analytics', { params })).data;
+};
 
 // Returns actions
 export const approveReturn = async (id) => (await api.post(`/returns/${id}/approve`)).data;
@@ -30,9 +36,11 @@ export const confirmTransfer = async (id) => (await api.post(`/transfers/${id}/c
 export const cancelTransfer = async (id) => (await api.post(`/transfers/${id}/cancel`)).data;
 
 // Report Exports
-export const exportReport = async (type, format) => {
+export const exportReport = async (type, format, storeId) => {
+  const params = { format };
+  if (storeId) params.storeId = storeId;
   const response = await api.get(`/analytics/export/${type}`, {
-    params: { format },
+    params,
     responseType: 'blob',
   });
   return response;

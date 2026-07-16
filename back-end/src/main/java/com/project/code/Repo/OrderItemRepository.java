@@ -28,6 +28,12 @@ public interface OrderItemRepository extends JpaRepository<OrderItem,Long> {
 
     @Query("SELECT oi.product.id, oi.product.name, SUM(oi.price) as totalRev FROM OrderItem oi WHERE oi.order.orderStatus <> 'CANCELLED' GROUP BY oi.product.id, oi.product.name ORDER BY totalRev DESC")
     List<Object[]> getTopSellingProductsByRevenue(Pageable pageable);
+
+    @Query("SELECT oi.product.id, oi.product.name, SUM(oi.quantity) as totalQty FROM OrderItem oi WHERE oi.order.orderStatus <> 'CANCELLED' AND oi.order.store.id IN :storeIds GROUP BY oi.product.id, oi.product.name ORDER BY totalQty DESC")
+    List<Object[]> getTopSellingProductsByQuantityForStores(@Param("storeIds") java.util.Collection<Long> storeIds, org.springframework.data.domain.Pageable pageable);
+
+    @Query("SELECT oi.product.id, oi.product.name, SUM(oi.price) as totalRev FROM OrderItem oi WHERE oi.order.orderStatus <> 'CANCELLED' AND oi.order.store.id IN :storeIds GROUP BY oi.product.id, oi.product.name ORDER BY totalRev DESC")
+    List<Object[]> getTopSellingProductsByRevenueForStores(@Param("storeIds") java.util.Collection<Long> storeIds, org.springframework.data.domain.Pageable pageable);
 }
 
 

@@ -70,8 +70,17 @@ public class SecurityConfig {
 
                 // 2. Employee-allowed specific mutations (MUST come before general store/product blocks)
                 .requestMatchers(HttpMethod.POST, "/store/placeOrder").hasAnyRole("ADMIN", "MANAGER", "EMPLOYEE")
+                .requestMatchers(HttpMethod.POST, "/inventory/adjustments/*/approve", "/inventory/adjustments/*/reject").hasAnyRole("ADMIN", "MANAGER")
+                .requestMatchers(HttpMethod.POST, "/inventory/adjustments").hasAnyRole("ADMIN", "MANAGER", "EMPLOYEE")
+                .requestMatchers(HttpMethod.GET, "/inventory/adjustments/**").hasAnyRole("ADMIN", "MANAGER", "EMPLOYEE")
                 .requestMatchers(HttpMethod.POST, "/inventory/**").hasAnyRole("ADMIN", "MANAGER", "EMPLOYEE")
-                .requestMatchers(HttpMethod.PUT, "/inventory/**").hasAnyRole("ADMIN", "MANAGER", "EMPLOYEE")
+                .requestMatchers(HttpMethod.PUT, "/inventory/**").hasAnyRole("ADMIN", "MANAGER")
+
+                // 2b. Notifications endpoints
+                .requestMatchers("/notifications/**").hasAnyRole("ADMIN", "MANAGER", "EMPLOYEE")
+
+                // 2c. Customers endpoints
+                .requestMatchers("/customers/**").hasAnyRole("ADMIN", "MANAGER", "EMPLOYEE")
 
                 // 3. Deletions on products, stores, and inventory are restricted to ADMIN, MANAGER
                 .requestMatchers(HttpMethod.DELETE, "/product/**").hasAnyRole("ADMIN", "MANAGER")
@@ -84,10 +93,13 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/store/**").hasAnyRole("ADMIN", "MANAGER")
                 .requestMatchers(HttpMethod.PUT, "/store/**").hasAnyRole("ADMIN", "MANAGER")
 
-                // 5. Category and Supplier writes (POST/PUT/DELETE) restricted to ADMIN, MANAGER
-                .requestMatchers(HttpMethod.POST, "/category/**", "/supplier/**").hasAnyRole("ADMIN", "MANAGER")
-                .requestMatchers(HttpMethod.PUT, "/category/**", "/supplier/**").hasAnyRole("ADMIN", "MANAGER")
-                .requestMatchers(HttpMethod.DELETE, "/category/**", "/supplier/**").hasAnyRole("ADMIN", "MANAGER")
+                // 5. Category writes restricted to ADMIN, MANAGER; Supplier writes restricted to ADMIN only
+                .requestMatchers(HttpMethod.POST, "/category/**").hasAnyRole("ADMIN", "MANAGER")
+                .requestMatchers(HttpMethod.PUT, "/category/**").hasAnyRole("ADMIN", "MANAGER")
+                .requestMatchers(HttpMethod.DELETE, "/category/**").hasAnyRole("ADMIN", "MANAGER")
+                .requestMatchers(HttpMethod.POST, "/supplier/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/supplier/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/supplier/**").hasRole("ADMIN")
 
                 // 5.1 Purchase Order writes (POST/PUT/DELETE) restricted to ADMIN, MANAGER
                 .requestMatchers(HttpMethod.POST, "/purchase-orders/**").hasAnyRole("ADMIN", "MANAGER")

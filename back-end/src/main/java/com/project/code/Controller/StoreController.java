@@ -36,11 +36,19 @@ public class StoreController {
     @Autowired
     private OrderService orderService;
 
+    @Autowired
+    private com.project.code.security.SecurityService securityService;
+
     @GetMapping
     @Operation(summary = "Get all stores", description = "Retrieve a list of all stores in the system.")
     @ApiResponse(responseCode = "200", description = "Successfully retrieved stores")
     public ResponseEntity<List<Store>> getAllStores() {
-        return ResponseEntity.ok(storeRepository.findAll());
+        if (securityService.isUserAdmin()) {
+            return ResponseEntity.ok(storeRepository.findAll());
+        } else {
+            java.util.Set<Long> storeIds = securityService.getAssignedStoreIds();
+            return ResponseEntity.ok(storeRepository.findAllById(storeIds));
+        }
     }
 
     @PostMapping

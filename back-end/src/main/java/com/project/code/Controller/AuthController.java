@@ -82,13 +82,13 @@ public class AuthController {
                 )
         );
 
-        User user = userRepository.findByUsername(request.getUsername())
+        User user = userRepository.findByUsernameWithStores(request.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found after authentication"));
 
         String accessToken = jwtService.generateAccessToken(user.getUsername(), user.getRole().name());
         String refreshToken = jwtService.generateRefreshToken(user.getUsername());
 
-        return ResponseEntity.ok(new AuthResponseDTO(accessToken, refreshToken, user.getUsername(), user.getRole()));
+        return ResponseEntity.ok(new AuthResponseDTO(accessToken, refreshToken, user.getUsername(), user.getRole(), user.getAssignedStores(), user.getDefaultStore()));
     }
 
     @PostMapping("/google")
@@ -122,9 +122,12 @@ public class AuthController {
             return userRepository.save(newUser);
         });
 
+        // Reload with store assignments after potential save
+        user = userRepository.findByUsernameWithStores(user.getUsername()).orElse(user);
+
         String accessToken = jwtService.generateAccessToken(user.getUsername(), user.getRole().name());
         String refreshToken = jwtService.generateRefreshToken(user.getUsername());
 
-        return ResponseEntity.ok(new AuthResponseDTO(accessToken, refreshToken, user.getUsername(), user.getRole()));
+        return ResponseEntity.ok(new AuthResponseDTO(accessToken, refreshToken, user.getUsername(), user.getRole(), user.getAssignedStores(), user.getDefaultStore()));
     }
 }

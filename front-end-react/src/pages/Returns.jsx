@@ -5,13 +5,16 @@ import { useAuth } from '../context/auth-context';
 import { Loader2 } from 'lucide-react';
 
 const Returns = () => {
-  const { user } = useAuth();
+  const { user, activeStore } = useAuth();
   const queryClient = useQueryClient();
   const canManage = user?.role === 'ADMIN' || user?.role === 'MANAGER';
   const [actionId, setActionId] = useState(null);
   const [error, setError] = useState('');
 
-  const { data: returns, isLoading } = useQuery({ queryKey: ['returns'], queryFn: getReturns });
+  const { data: returns, isLoading } = useQuery({
+    queryKey: ['returns', activeStore?.id],
+    queryFn: () => getReturns(activeStore?.id)
+  });
 
   const approveMutation = useMutation({
     mutationFn: approveReturn,
