@@ -45,3 +45,35 @@ export const exportReport = async (type, format, storeId) => {
   });
   return response;
 };
+
+// Notifications management
+export const getNotifications = async () => {
+  const response = await api.get('/notifications');
+  return response.data;
+};
+
+export const markNotificationAsRead = async (id) => {
+  const response = await api.put(`/notifications/${id}/read`);
+  return response.data;
+};
+
+export const getTopSellingProducts = async (limit = 10, storeId) => {
+  const params = { limit };
+  if (storeId) params.storeId = storeId;
+  const response = await api.get('/analytics/top-selling', { params });
+  return response.data;
+};
+
+export const getLowStockAnalytics = async (storeId) => {
+  const params = storeId ? { storeId } : {};
+  const response = await api.get('/analytics/low-stock', { params });
+  return response.data;
+};
+
+export const getCustomers = async () => {
+  const response = await api.get('/customers');
+  return response.data;
+};
+
+
+

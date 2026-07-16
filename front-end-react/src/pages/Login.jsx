@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/auth-context';
-import { Lock, User, Eye, EyeOff, Package, Loader2 } from 'lucide-react';
+import { Lock, User, Eye, EyeOff, Store, Loader2, ArrowRight } from 'lucide-react';
 
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({ username: '', password: '' });
   const [loading, setLoading] = useState(false);
@@ -36,7 +37,7 @@ const Login = () => {
       });
       window.google.accounts.id.renderButton(
         document.getElementById('google-signin-button'),
-        { theme: 'outline', size: 'large', text: 'continue_with', width: 380 }
+        { theme: 'outline', size: 'large', text: 'continue_with', width: 360 }
       );
     }
   }, [loginWithGoogle]);
@@ -79,122 +80,158 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-indigo-50 p-4">
-      <div className="bg-white p-8 rounded-2xl shadow-xl border border-slate-100 w-full max-w-md transition-all duration-300 hover:shadow-2xl">
+    <div className="min-h-screen w-full relative flex items-center justify-center bg-slate-950 overflow-hidden font-sans p-4">
+      {/* Background design elements (Floating gradient blobs) */}
+      <div className="absolute top-1/4 -left-12 w-72 h-72 rounded-full bg-brand-600/20 blur-3xl animate-blob" />
+      <div className="absolute bottom-1/4 -right-12 w-96 h-96 rounded-full bg-indigo-500/25 blur-3xl animate-blob animation-delay-2000" />
+      <div className="absolute top-1/3 right-1/4 w-64 h-64 rounded-full bg-purple-500/10 blur-3xl animate-blob animation-delay-4000" />
+      
+      {/* Subtle gird pattern background overlay */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-35" />
+
+      {/* Main card */}
+      <div className="w-full max-w-md bg-slate-900/60 backdrop-blur-md border border-slate-800 rounded-2xl p-8 shadow-2xl relative z-10 flex flex-col items-stretch space-y-6">
         
-        {/* Brand/Logo Section */}
-        <div className="flex flex-col items-center mb-8">
-          <div className="flex items-center space-x-2 bg-indigo-50 px-4 py-2 rounded-2xl mb-4">
-            <Package className="h-6 w-6 text-indigo-600 animate-bounce" />
-            <span className="text-xl font-bold text-indigo-900 tracking-tight">InventorySystem</span>
+        {/* Company Identity Header */}
+        <div className="flex flex-col items-center text-center space-y-2">
+          <div className="h-11 w-11 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-brand-500/10 mb-2">
+            <Store className="h-6 w-6" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">Welcome Back</h1>
-          <p className="text-slate-500 text-sm mt-1">Sign in to manage your inventory</p>
+          <h1 className="text-2xl font-bold tracking-tight text-white font-display">Welcome Back</h1>
+          <p className="text-xs text-slate-400">Sign in to access your Aegis ERP account</p>
         </div>
 
         {error && (
-          <div className="mb-6 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm text-center font-medium animate-pulse">
+          <div className="p-3 bg-red-950/40 border border-red-900/60 text-red-400 text-xs font-semibold rounded-lg text-center animate-fade-in">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          
           {/* Username Input */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1.5">Username</label>
+          <div className="space-y-1.5">
+            <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">Username</label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                <User className="h-5 w-5 text-slate-400" />
-              </div>
+              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                <User className="h-4 w-4 text-slate-500" />
+              </span>
               <input
                 type="text"
+                autoFocus
                 required
-                className={`pl-11 w-full p-2.5 border ${
-                  fieldErrors.username ? 'border-red-500 focus:ring-red-200 focus:border-red-500' : 'border-slate-300 focus:ring-indigo-100 focus:border-indigo-500'
-                } rounded-xl focus:ring-4 outline-none transition duration-200`}
+                disabled={loading}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Enter your username"
-                aria-invalid={fieldErrors.username ? "true" : "false"}
+                className={`w-full text-xs pl-10 pr-3 py-2.5 bg-slate-950 hover:bg-slate-950/80 focus:bg-slate-950 text-white rounded-lg border focus:outline-none transition-all ${
+                  fieldErrors.username 
+                    ? 'border-red-500/70 focus:ring-1 focus:ring-red-500' 
+                    : 'border-slate-800 focus:border-brand-500 focus:ring-1 focus:ring-brand-500'
+                }`}
               />
             </div>
             {fieldErrors.username && (
-              <p className="text-red-500 text-xs mt-1.5 font-medium">{fieldErrors.username}</p>
+              <p className="text-red-400 text-[10px] font-semibold">{fieldErrors.username}</p>
             )}
           </div>
 
           {/* Password Input */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1.5">Password</label>
+          <div className="space-y-1.5">
+            <div className="flex justify-between items-center">
+              <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">Password</label>
+              <button
+                type="button"
+                onClick={() => {}}
+                className="text-[10px] font-bold text-brand-500 hover:text-brand-400 transition-colors"
+              >
+                Forgot?
+              </button>
+            </div>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                <Lock className="h-5 w-5 text-slate-400" />
-              </div>
+              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                <Lock className="h-4 w-4 text-slate-500" />
+              </span>
               <input
-                type={showPassword ? "text" : "password"}
+                type={showPassword ? 'text' : 'password'}
                 required
-                className={`pl-11 pr-10 w-full p-2.5 border ${
-                  fieldErrors.password ? 'border-red-500 focus:ring-red-200 focus:border-red-500' : 'border-slate-300 focus:ring-indigo-100 focus:border-indigo-500'
-                } rounded-xl focus:ring-4 outline-none transition duration-200`}
+                disabled={loading}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                aria-invalid={fieldErrors.password ? "true" : "false"}
+                placeholder="Enter password"
+                className={`w-full text-xs pl-10 pr-10 py-2.5 bg-slate-950 hover:bg-slate-950/80 focus:bg-slate-950 text-white rounded-lg border focus:outline-none transition-all ${
+                  fieldErrors.password 
+                    ? 'border-red-500/70 focus:ring-1 focus:ring-red-500' 
+                    : 'border-slate-800 focus:border-brand-500 focus:ring-1 focus:ring-brand-500'
+                }`}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-indigo-600 transition"
+                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-500 hover:text-slate-350 transition-colors"
               >
-                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
             {fieldErrors.password && (
-              <p className="text-red-500 text-xs mt-1.5 font-medium">{fieldErrors.password}</p>
+              <p className="text-red-400 text-[10px] font-semibold">{fieldErrors.password}</p>
             )}
           </div>
 
-          {/* Submit Button */}
+          {/* Remember me option */}
+          <div className="flex items-center justify-between py-1 text-xs">
+            <label className="flex items-center space-x-2 text-slate-400 cursor-pointer select-none">
+              <input 
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="rounded border-slate-800 text-brand-600 focus:ring-brand-500 bg-slate-950 h-3.5 w-3.5 cursor-pointer" 
+              />
+              <span className="text-[11px] font-medium text-slate-400">Remember this device</span>
+            </label>
+          </div>
+
+          {/* Login Button */}
           <button
             type="submit"
             disabled={loading}
-            className={`w-full py-3 px-4 rounded-xl text-white font-semibold shadow-md transition-all duration-200 ${
+            className={`w-full py-2.5 px-4 rounded-lg text-xs font-semibold text-white shadow-md transition-all duration-200 ${
               loading 
-                ? 'bg-indigo-400 cursor-not-allowed' 
-                : 'bg-indigo-600 hover:bg-indigo-700 hover:shadow-lg active:scale-98'
-            } flex justify-center items-center space-x-2`}
+                ? 'bg-slate-800 text-slate-500 cursor-not-allowed' 
+                : 'bg-brand-600 hover:bg-brand-700 hover:scale-[1.01] active:scale-[0.99]'
+            } flex justify-center items-center gap-2 focus:outline-none`}
           >
             {loading ? (
               <>
-                <Loader2 className="h-5 w-5 animate-spin" />
-                <span>Signing in...</span>
+                <Loader2 className="h-4 w-4 animate-spin text-slate-500" />
+                <span>Verifying credentials...</span>
               </>
             ) : (
-              <span>Sign in</span>
+              <>
+                <span>Sign in</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </>
             )}
           </button>
         </form>
 
         {/* Divider */}
-        <div className="relative my-6">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-slate-200"></div>
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-white px-4 text-slate-400 font-medium">Or continue with</span>
-          </div>
+        <div className="relative flex items-center py-2">
+          <div className="flex-grow border-t border-slate-800"></div>
+          <span className="flex-shrink mx-4 text-[10px] uppercase font-bold text-slate-500 tracking-wider">or continue with</span>
+          <div className="flex-grow border-t border-slate-800"></div>
         </div>
 
         {/* Google OAuth Button Container */}
-        <div className="w-full flex justify-center">
-          <div id="google-signin-button" className="w-full max-w-[380px]"></div>
+        <div className="w-full flex justify-center select-none">
+          <div id="google-signin-button" className="w-full max-w-[360px] flex justify-center"></div>
         </div>
 
         {/* Signup Link Footer */}
-        <div className="mt-8 text-center text-sm text-slate-500 font-medium">
-          Don't have an account?{' '}
-          <Link to="/signup" className="text-indigo-600 hover:text-indigo-800 font-bold transition">
-            Sign up
+        <div className="text-center text-xs text-slate-400 font-medium pt-2">
+          New to the platform?{' '}
+          <Link to="/signup" className="text-brand-500 hover:text-brand-400 font-bold transition-colors">
+            Register Workspace
           </Link>
         </div>
 
