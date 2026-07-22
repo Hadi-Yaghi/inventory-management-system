@@ -55,10 +55,13 @@ api.interceptors.response.use(
     // If we get 401 and not already retrying
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      // Ideally call a refresh token endpoint here.
-      // For now, if unauthorized, we can just reject or trigger a global logout
-      // by dispatching a custom event
-      window.dispatchEvent(new Event('unauthorized'));
+      const isAuthEndpoint = originalRequest.url?.includes('/auth/login') || 
+                             originalRequest.url?.includes('/auth/register') || 
+                             originalRequest.url?.includes('/auth/google') || 
+                             originalRequest.url?.includes('/auth/accept-invitation');
+      if (!isAuthEndpoint) {
+        window.dispatchEvent(new Event('unauthorized'));
+      }
     }
 
     return Promise.reject(error);
