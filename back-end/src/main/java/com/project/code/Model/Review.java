@@ -10,6 +10,9 @@ public class Review {
 @Id
 private String id;
 
+@NotNull
+private Long organizationId;
+
 
     @NotNull(message = "customer cannot be null")
   private Long customerId;
@@ -40,6 +43,8 @@ private String id;
     public String getId() {
         return id;
     }
+    public Long getOrganizationId() { return organizationId; }
+    public void setOrganizationId(Long organizationId) { this.organizationId = organizationId; }
 
     public void setId(String id) {
         this.id = id;

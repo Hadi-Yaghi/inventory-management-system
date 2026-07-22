@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 
 
 @Entity
-public class Inventory {
+public class Inventory extends TenantEntity {
 
 
     @Id

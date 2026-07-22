@@ -17,6 +17,7 @@ import Returns from './pages/Returns';
 import Reviews from './pages/Reviews';
 import Reports from './pages/Reports';
 import AddProduct from './pages/AddProduct';
+import OrganizationSettings from './pages/OrganizationSettings';
 
 function App() {
   return (
@@ -42,6 +43,7 @@ function App() {
                 <Route path="/categories" element={<Categories />} />
                 <Route path="/reports" element={<Reports />} />
                 <Route path="/products/new" element={<AddProduct />} />
+                <Route path="/organization-settings" element={<OrganizationSettings />} />
               </Route>
               
               {/* Admin Only Routes */}

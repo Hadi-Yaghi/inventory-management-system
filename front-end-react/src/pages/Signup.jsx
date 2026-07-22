@@ -1,28 +1,59 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/auth-context';
 import api from '../api/axios';
-import { Lock, User, Mail, Eye, EyeOff, Store, Loader2, ArrowRight, Check, AlertCircle } from 'lucide-react';
+import { Lock, User, Mail, Eye, EyeOff, Store, Loader2, Check, AlertCircle, Building2, Ticket } from 'lucide-react';
 
 const Signup = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { loginWithGoogle } = useAuth();
-  
+
+  const searchParams = new URLSearchParams(location.search);
+  const urlToken = searchParams.get('token') || '';
+
+  const [signupMode, setSignupMode] = useState(urlToken ? 'invitation' : 'new_org');
+
   const [formData, setFormData] = useState({
-    username: '', // Maps to Full Name / Username constraint
+    username: '',
     email: '',
     password: '',
     role: 'EMPLOYEE',
+    organizationName: '',
+    invitationToken: urlToken,
   });
+  
+  const [invitedOrgDetails, setInvitedOrgDetails] = useState(null);
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   
   const [error, setError] = useState('');
-  const [fieldErrors, setFieldErrors] = useState({ username: '', email: '', password: '', confirmPassword: '' });
+  const [fieldErrors, setFieldErrors] = useState({ username: '', email: '', password: '', confirmPassword: '', organizationName: '', invitationToken: '' });
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (urlToken) {
+      setSignupMode('invitation');
+      setFormData((prev) => ({ ...prev, invitationToken: urlToken }));
+      fetchInvitationDetails(urlToken);
+    }
+  }, [urlToken]);
+
+  const fetchInvitationDetails = async (token) => {
+    if (!token) return;
+    try {
+      const res = await api.get(`/organizations/public/invitation/${token}`);
+      setInvitedOrgDetails(res.data);
+      if (res.data.email) {
+        setFormData((prev) => ({ ...prev, email: res.data.email, role: res.data.role }));
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Invalid or expired invitation token');
+    }
+  };
 
   const handleGoogleCredentialResponse = async (response) => {
     const idToken = response.credential;
@@ -57,7 +88,6 @@ const Signup = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Dynamic Password Strength Calculations
   const pwRules = useMemo(() => {
     const pw = formData.password;
     return {
@@ -90,19 +120,30 @@ const Signup = () => {
     e.preventDefault();
     setError('');
     setSuccess('');
-    setFieldErrors({ username: '', email: '', password: '', confirmPassword: '' });
+    setFieldErrors({ username: '', email: '', password: '', confirmPassword: '', organizationName: '', invitationToken: '' });
 
     let hasError = false;
-    const errors = { username: '', email: '', password: '', confirmPassword: '' };
+    const errors = { username: '', email: '', password: '', confirmPassword: '', organizationName: '', invitationToken: '' };
 
     if (!formData.username.trim()) {
-      errors.username = 'Full Name / Username is required';
+      errors.username = 'Username is required';
       hasError = true;
     }
     if (!formData.email.trim()) {
       errors.email = 'Email address is required';
       hasError = true;
     }
+
+    if (signupMode === 'new_org' && !formData.organizationName.trim()) {
+      errors.organizationName = 'Organization name is required';
+      hasError = true;
+    }
+
+    if (signupMode === 'invitation' && !formData.invitationToken.trim()) {
+      errors.invitationToken = 'Invitation token is required';
+      hasError = true;
+    }
+
     if (!formData.password) {
       errors.password = 'Password is required';
       hasError = true;
@@ -126,7 +167,15 @@ const Signup = () => {
 
     setLoading(true);
     try {
-      const response = await api.post('/auth/register', formData);
+      const payload = {
+        username: formData.username.trim(),
+        email: formData.email.trim(),
+        password: formData.password,
+        organizationName: signupMode === 'new_org' ? formData.organizationName.trim() : undefined,
+        invitationToken: signupMode === 'invitation' ? formData.invitationToken.trim() : undefined,
+      };
+
+      const response = await api.post('/auth/register', payload);
       if (response.data.message?.includes('already taken')) {
         setError(response.data.message);
       } else {
@@ -141,25 +190,41 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen w-full relative flex items-center justify-center bg-slate-950 overflow-hidden font-sans p-4">
-      {/* Animated blob backgrounds */}
+    <div className="min-h-screen w-full relative flex items-center justify-center bg-slate-950 font-sans p-4 overflow-x-hidden">
       <div className="absolute top-1/4 -left-12 w-72 h-72 rounded-full bg-brand-600/20 blur-3xl animate-blob" />
       <div className="absolute bottom-1/4 -right-12 w-96 h-96 rounded-full bg-indigo-500/25 blur-3xl animate-blob animation-delay-2000" />
-      <div className="absolute top-1/3 right-1/4 w-64 h-64 rounded-full bg-purple-500/10 blur-3xl animate-blob animation-delay-4000" />
-      
-      {/* Subtle gird pattern background overlay */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-35" />
 
-      {/* Main Container Card */}
       <div className="w-full max-w-lg bg-slate-900/60 backdrop-blur-md border border-slate-800 rounded-2xl p-6 md:p-8 shadow-2xl relative z-10 flex flex-col space-y-6">
-        
-        {/* Header */}
         <div className="flex flex-col items-center text-center space-y-2">
-          <div className="h-11 w-11 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-brand-500/10 mb-1">
+          <div className="h-11 w-11 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 flex items-center justify-center text-white shadow-md mb-1">
             <Store className="h-6 w-6" />
           </div>
-          <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white font-display">Create an Account</h1>
-          <p className="text-xs text-slate-400">Register a new profile credentials to access the ERP platform</p>
+          <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white font-display">Create SaaS Account</h1>
+          <p className="text-xs text-slate-400">Register your organization or join an existing workspace</p>
+        </div>
+
+        {/* Signup Mode Toggle */}
+        <div className="grid grid-cols-2 p-1 bg-slate-950/70 border border-slate-800 rounded-xl">
+          <button
+            type="button"
+            onClick={() => { setSignupMode('new_org'); setError(''); }}
+            className={`flex items-center justify-center gap-2 py-2 text-xs font-semibold rounded-lg transition-all ${
+              signupMode === 'new_org' ? 'bg-brand-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Building2 className="h-3.5 w-3.5" />
+            <span>New Organization</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => { setSignupMode('invitation'); setError(''); }}
+            className={`flex items-center justify-center gap-2 py-2 text-xs font-semibold rounded-lg transition-all ${
+              signupMode === 'invitation' ? 'bg-brand-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Ticket className="h-3.5 w-3.5" />
+            <span>Have Invitation</span>
+          </button>
         </div>
 
         {error && (
@@ -176,11 +241,58 @@ const Signup = () => {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            
-            {/* Full Name Input */}
+          {signupMode === 'new_org' ? (
             <div className="space-y-1.5">
-              <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">Full Name / Username</label>
+              <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">Organization Name</label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                  <Building2 className="h-4 w-4 text-slate-500" />
+                </span>
+                <input
+                  type="text"
+                  name="organizationName"
+                  placeholder="e.g. Acme Logistics Corp"
+                  disabled={loading}
+                  value={formData.organizationName}
+                  onChange={handleChange}
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-950/60 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all"
+                />
+              </div>
+              {fieldErrors.organizationName && <p className="text-[11px] text-red-400 font-medium">{fieldErrors.organizationName}</p>}
+            </div>
+          ) : (
+            <div className="space-y-1.5">
+              <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">Invitation Code / Token</label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                  <Ticket className="h-4 w-4 text-slate-500" />
+                </span>
+                <input
+                  type="text"
+                  name="invitationToken"
+                  placeholder="Paste invitation token here"
+                  disabled={loading || Boolean(urlToken)}
+                  value={formData.invitationToken}
+                  onChange={(e) => {
+                    handleChange(e);
+                    if (e.target.value.length > 20) fetchInvitationDetails(e.target.value.trim());
+                  }}
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-950/60 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all"
+                />
+              </div>
+              {invitedOrgDetails && (
+                <div className="p-2.5 bg-brand-950/30 border border-brand-900/50 rounded-lg text-xs text-brand-300 flex flex-col gap-0.5">
+                  <span className="font-semibold">Joining: {invitedOrgDetails.organizationName}</span>
+                  <span className="text-[11px] text-slate-400">Assigned Role: {invitedOrgDetails.role}</span>
+                </div>
+              )}
+              {fieldErrors.invitationToken && <p className="text-[11px] text-red-400 font-medium">{fieldErrors.invitationToken}</p>}
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">Username</label>
               <div className="relative">
                 <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                   <User className="h-4 w-4 text-slate-500" />
@@ -188,25 +300,17 @@ const Signup = () => {
                 <input
                   type="text"
                   name="username"
-                  autoFocus
                   required
                   disabled={loading}
                   value={formData.username}
                   onChange={handleChange}
-                  placeholder="Enter full name"
-                  className={`w-full text-xs pl-10 pr-3 py-2.5 bg-slate-950 hover:bg-slate-950/80 focus:bg-slate-950 text-white rounded-lg border focus:outline-none transition-all ${
-                    fieldErrors.username 
-                      ? 'border-red-500/70 focus:ring-1 focus:ring-red-500' 
-                      : 'border-slate-800 focus:border-brand-500 focus:ring-1 focus:ring-brand-500'
-                  }`}
+                  placeholder="johndoe"
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-950/60 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all"
                 />
               </div>
-              {fieldErrors.username && (
-                <p className="text-red-400 text-[10px] font-semibold">{fieldErrors.username}</p>
-              )}
+              {fieldErrors.username && <p className="text-[11px] text-red-400 font-medium">{fieldErrors.username}</p>}
             </div>
 
-            {/* Email Input */}
             <div className="space-y-1.5">
               <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">Email Address</label>
               <div className="relative">
@@ -220,24 +324,15 @@ const Signup = () => {
                   disabled={loading}
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="name@company.com"
-                  className={`w-full text-xs pl-10 pr-3 py-2.5 bg-slate-950 hover:bg-slate-950/80 focus:bg-slate-950 text-white rounded-lg border focus:outline-none transition-all ${
-                    fieldErrors.email 
-                      ? 'border-red-500/70 focus:ring-1 focus:ring-red-500' 
-                      : 'border-slate-800 focus:border-brand-500 focus:ring-1 focus:ring-brand-500'
-                  }`}
+                  placeholder="john@example.com"
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-950/60 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all"
                 />
               </div>
-              {fieldErrors.email && (
-                <p className="text-red-400 text-[10px] font-semibold">{fieldErrors.email}</p>
-              )}
+              {fieldErrors.email && <p className="text-[11px] text-red-400 font-medium">{fieldErrors.email}</p>}
             </div>
-
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            
-            {/* Password Input */}
             <div className="space-y-1.5">
               <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">Password</label>
               <div className="relative">
@@ -251,27 +346,20 @@ const Signup = () => {
                   disabled={loading}
                   value={formData.password}
                   onChange={handleChange}
-                  placeholder="Create password"
-                  className={`w-full text-xs pl-10 pr-10 py-2.5 bg-slate-950 hover:bg-slate-950/80 focus:bg-slate-950 text-white rounded-lg border focus:outline-none transition-all ${
-                    fieldErrors.password 
-                      ? 'border-red-500/70 focus:ring-1 focus:ring-red-500' 
-                      : 'border-slate-800 focus:border-brand-500 focus:ring-1 focus:ring-brand-500'
-                  }`}
+                  placeholder="••••••••"
+                  className="w-full pl-10 pr-10 py-2.5 bg-slate-950/60 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-500 hover:text-slate-350"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-300"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-              {fieldErrors.password && (
-                <p className="text-red-400 text-[10px] font-semibold">{fieldErrors.password}</p>
-              )}
+              {fieldErrors.password && <p className="text-[11px] text-red-400 font-medium">{fieldErrors.password}</p>}
             </div>
 
-            {/* Confirm Password Input */}
             <div className="space-y-1.5">
               <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">Confirm Password</label>
               <div className="relative">
@@ -280,146 +368,62 @@ const Signup = () => {
                 </span>
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
+                  name="confirmPassword"
                   required
                   disabled={loading}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Re-type password"
-                  className={`w-full text-xs pl-10 pr-10 py-2.5 bg-slate-950 hover:bg-slate-950/80 focus:bg-slate-950 text-white rounded-lg border focus:outline-none transition-all ${
-                    fieldErrors.confirmPassword 
-                      ? 'border-red-500/70 focus:ring-1 focus:ring-red-500' 
-                      : 'border-slate-800 focus:border-brand-500 focus:ring-1 focus:ring-brand-500'
-                  }`}
+                  placeholder="••••••••"
+                  className="w-full pl-10 pr-10 py-2.5 bg-slate-950/60 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-500 hover:text-slate-350"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-300"
                 >
                   {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-              {fieldErrors.confirmPassword && (
-                <p className="text-red-400 text-[10px] font-semibold">{fieldErrors.confirmPassword}</p>
-              )}
+              {fieldErrors.confirmPassword && <p className="text-[11px] text-red-400 font-medium">{fieldErrors.confirmPassword}</p>}
             </div>
-
           </div>
 
-          {/* Password strength visualizer and requirement checklist */}
-          {formData.password && (
-            <div className="p-3 bg-slate-950/50 rounded-lg border border-slate-800 space-y-3 animate-fade-in">
-              <div className="flex justify-between items-center text-[10px]">
-                <span className="text-slate-400 font-bold uppercase tracking-wider">Strength: <span className={strengthDetails.text}>{strengthDetails.label}</span></span>
-                <span className="text-slate-500 font-bold">{passwordStrengthScore}%</span>
-              </div>
-              
-              {/* Strength bar gauge */}
-              <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                <div 
-                  className={`h-1.5 rounded-full transition-all duration-300 ${strengthDetails.color}`}
-                  style={{ width: `${passwordStrengthScore}%` }} 
-                />
-              </div>
-
-              {/* Dynamic checklist requirements */}
-              <div className="grid grid-cols-2 gap-2 text-[10px]">
-                <div className={`flex items-center gap-1.5 ${pwRules.length ? 'text-emerald-400' : 'text-slate-500'}`}>
-                  <span className="shrink-0">●</span>
-                  <span>At least 8 chars</span>
-                </div>
-                <div className={`flex items-center gap-1.5 ${pwRules.capital ? 'text-emerald-400' : 'text-slate-500'}`}>
-                  <span className="shrink-0">●</span>
-                  <span>Capital letter</span>
-                </div>
-                <div className={`flex items-center gap-1.5 ${pwRules.number ? 'text-emerald-400' : 'text-slate-500'}`}>
-                  <span className="shrink-0">●</span>
-                  <span>A number (0-9)</span>
-                </div>
-                <div className={`flex items-center gap-1.5 ${pwRules.special ? 'text-emerald-400' : 'text-slate-500'}`}>
-                  <span className="shrink-0">●</span>
-                  <span>Special char</span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Role Dropdown Selector */}
-          <div className="space-y-1.5">
-            <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">Assigned Security Role</label>
-            <select
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              disabled={loading}
-              className="w-full text-xs border border-slate-800 rounded-lg p-2.5 bg-slate-950 hover:bg-slate-950/80 text-slate-300 focus:outline-none focus:ring-1 focus:ring-brand-500 cursor-pointer font-semibold"
-            >
-              <option value="EMPLOYEE">Employee (Shelf Counting & Order Entry)</option>
-              <option value="MANAGER">Manager (Store Inventory Control)</option>
-              <option value="ADMIN">Admin (Full System Configurations)</option>
-            </select>
-          </div>
-
-          {/* Terms & Conditions Check */}
-          <div className="flex items-center justify-between py-1 text-xs">
-            <label className="flex items-center space-x-2 text-slate-400 cursor-pointer select-none">
-              <input 
-                type="checkbox"
-                required
-                checked={termsAccepted}
-                onChange={(e) => setTermsAccepted(e.target.checked)}
-                className="rounded border-slate-800 text-brand-600 focus:ring-brand-500 bg-slate-950 h-3.5 w-3.5 cursor-pointer" 
-              />
-              <span className="text-[11px] text-slate-400 font-medium leading-tight">
-                I agree to the Terms of Service and Privacy Policy
-              </span>
+          <div className="flex items-center space-x-2 pt-1">
+            <input
+              type="checkbox"
+              id="terms"
+              checked={termsAccepted}
+              onChange={(e) => setTermsAccepted(e.target.checked)}
+              className="rounded bg-slate-950 border-slate-800 text-brand-600 focus:ring-brand-500 h-4 w-4"
+            />
+            <label htmlFor="terms" className="text-xs text-slate-400">
+              I agree to the <a href="#" className="text-brand-400 hover:underline">Terms of Service</a> & <a href="#" className="text-brand-400 hover:underline">Privacy Policy</a>
             </label>
           </div>
 
-          {/* Create Button */}
           <button
             type="submit"
             disabled={loading}
-            className={`w-full py-2.5 px-4 rounded-lg text-xs font-semibold text-white shadow-md transition-all duration-200 ${
-              loading 
-                ? 'bg-slate-800 text-slate-500 cursor-not-allowed' 
-                : 'bg-brand-600 hover:bg-brand-700 hover:scale-[1.01] active:scale-[0.99]'
-            } flex justify-center items-center gap-2 focus:outline-none`}
+            className="w-full py-3 px-4 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-semibold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
           >
-            {loading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin text-slate-500" />
-                <span>Creating ERP workspace profile...</span>
-              </>
-            ) : (
-              <>
-                <span>Create account</span>
-                <ArrowRight className="h-3.5 w-3.5" />
-              </>
-            )}
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Complete Registration'}
           </button>
         </form>
 
-        {/* Divider */}
-        <div className="relative flex items-center py-1">
-          <div className="flex-grow border-t border-slate-800"></div>
-          <span className="flex-shrink mx-4 text-[10px] uppercase font-bold text-slate-500 tracking-wider">or sign up with</span>
-          <div className="flex-grow border-t border-slate-800"></div>
+        <div className="relative flex items-center justify-center my-2">
+          <div className="border-t border-slate-800 w-full" />
+          <span className="bg-slate-900 px-3 text-[11px] text-slate-500 uppercase font-medium">Or</span>
+          <div className="border-t border-slate-800 w-full" />
         </div>
 
-        {/* Google OAuth Button Container */}
-        <div className="w-full flex justify-center select-none">
-          <div id="google-signup-button" className="w-full max-w-[360px] flex justify-center"></div>
-        </div>
+        <div id="google-signup-button" className="flex justify-center" />
 
-        {/* Login Link Footer */}
-        <div className="text-center text-xs text-slate-400 font-medium pt-1">
-          Already registered?{' '}
-          <Link to="/login" className="text-brand-500 hover:text-brand-400 font-bold transition-colors">
-            Sign in
+        <p className="text-center text-xs text-slate-400 pt-2">
+          Already have an account?{' '}
+          <Link to="/login" className="text-brand-400 font-semibold hover:underline">
+            Sign In
           </Link>
-        </div>
-
+        </p>
       </div>
     </div>
   );

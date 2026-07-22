@@ -43,12 +43,12 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (username, password) => {
     const response = await api.post('/auth/login', { username, password });
-    const { accessToken, refreshToken, role, assignedStores, defaultStore } = response.data;
+    const { accessToken, refreshToken, role, assignedStores, defaultStore, organization } = response.data;
     
     setAccessToken(accessToken);
     localStorage.setItem('refreshToken', refreshToken);
     
-    const userData = { username: response.data.username, role, assignedStores, defaultStore };
+    const userData = { username: response.data.username, role, assignedStores, defaultStore, organization };
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
 
@@ -64,12 +64,12 @@ export const AuthProvider = ({ children }) => {
 
   const loginWithGoogle = async (idToken) => {
     const response = await api.post('/auth/google', { idToken });
-    const { accessToken, refreshToken, role, assignedStores, defaultStore } = response.data;
+    const { accessToken, refreshToken, role, assignedStores, defaultStore, organization } = response.data;
     
     setAccessToken(accessToken);
     localStorage.setItem('refreshToken', refreshToken);
     
-    const userData = { username: response.data.username, role, assignedStores, defaultStore };
+    const userData = { username: response.data.username, role, assignedStores, defaultStore, organization };
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
 

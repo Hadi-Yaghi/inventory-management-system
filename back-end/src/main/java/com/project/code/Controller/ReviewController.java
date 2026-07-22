@@ -18,6 +18,7 @@ import com.project.code.Model.Customer;
 import com.project.code.Model.Review;
 import com.project.code.Repo.CustomerRepository;
 import com.project.code.Repo.ReviewRepository;
+import com.project.code.tenant.TenantContext;
 
 @RestController
 @RequestMapping("/reviews")
@@ -39,7 +40,7 @@ public class ReviewController {
     public Map<String,Object> getReviews(@PathVariable long storeId, @PathVariable long productId, Pageable pageable)
     {
         Map<String, Object> map = new HashMap<>();
-        Page<Review> page = reviewRepository.findByStoreIdAndProductId(storeId, productId, pageable);
+        Page<Review> page = reviewRepository.findByOrganizationIdAndStoreIdAndProductId(TenantContext.getOrganizationId(), storeId, productId, pageable);
 
         List<Map<String, Object>> reviewsWithCustomerNames = new ArrayList<>();
 
@@ -73,7 +74,7 @@ public class ReviewController {
     @ApiResponse(responseCode = "200", description = "Successfully retrieved all reviews")
     public Map<String,Object> getAllReviews(Pageable pageable)
     {
-        Page<Review> page = reviewRepository.findAll(pageable);
+        Page<Review> page = reviewRepository.findByOrganizationId(TenantContext.getOrganizationId(), pageable);
         Map<String,Object> map = new HashMap<>();
         map.put("reviews", page.getContent());
         map.put("currentPage", page.getNumber());
@@ -87,6 +88,7 @@ public class ReviewController {
     @Operation(summary = "Submit a review", description = "Submit a product review. The system verifies if the customer has made a purchase of the product at the store to mark it as verified.")
     @CacheEvict(value = "products", allEntries = true)
     public Review addReview(@jakarta.validation.Valid @RequestBody Review review) {
+        review.setOrganizationId(TenantContext.getOrganizationId());
         boolean isVerified = orderItemRepository.existsByCustomerAndProductAndStore(
                 review.getCustomerId(), review.getProductId(), review.getStoreId());
         review.setVerifiedPurchase(isVerified);
@@ -96,7 +98,7 @@ public class ReviewController {
     @PostMapping("/{id}/like")
     @Operation(summary = "Like a review", description = "Increment the likes count for the specified review.")
     public Review likeReview(@PathVariable String id) {
-        Review review = reviewRepository.findById(id)
+        Review review = reviewRepository.findByIdAndOrganizationId(id, TenantContext.getOrganizationId())
                 .orElseThrow(() -> new com.project.code.exception.NotFoundException("Review not found with ID: " + id));
         review.setLikes(review.getLikes() + 1);
         return reviewRepository.save(review);
@@ -105,7 +107,7 @@ public class ReviewController {
     @PostMapping("/{id}/reply")
     @Operation(summary = "Reply to a review", description = "Add a reply to the specified review.")
     public Review replyToReview(@PathVariable String id, @RequestParam String authorId, @RequestParam String text) {
-        Review review = reviewRepository.findById(id)
+        Review review = reviewRepository.findByIdAndOrganizationId(id, TenantContext.getOrganizationId())
                 .orElseThrow(() -> new com.project.code.exception.NotFoundException("Review not found with ID: " + id));
         if (review.getReplies() == null) {
             review.setReplies(new ArrayList<>());

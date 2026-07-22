@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Package, Users, LogOut, Tags, Truck, FileText,
   Activity, RotateCcw, Star, Download, ShoppingCart, Bell, Search,
   Menu, X, ChevronLeft, ChevronRight, Store, ShieldAlert,
-  User, Check, AlertCircle, Info, HelpCircle
+  User, Check, AlertCircle, Info, HelpCircle, Building2
 } from 'lucide-react';
 
 const Layout = () => {
@@ -90,6 +90,7 @@ const Layout = () => {
         { name: 'Reports', href: '/reports', icon: Download, roles: ['ADMIN', 'MANAGER'] },
         { name: 'Activity Logs', href: '/activity-logs', icon: Activity, roles: ['ADMIN'] },
         { name: 'User Directory', href: '/users', icon: Users, roles: ['ADMIN'] },
+        { name: 'Organization', href: '/organization-settings', icon: Building2, roles: ['ADMIN', 'MANAGER'] },
       ]
     }
   ];

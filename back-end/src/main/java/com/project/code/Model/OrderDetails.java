@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 @Entity
-public class OrderDetails {
+public class OrderDetails extends TenantEntity {
 
 
     @Id

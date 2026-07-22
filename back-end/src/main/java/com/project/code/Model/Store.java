@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 @Entity
-public class Store {
+public class Store extends TenantEntity {
 
 
 
@@ -62,4 +62,3 @@ public class Store {
         this.inventoryList = inventoryList;
     }
 }
-

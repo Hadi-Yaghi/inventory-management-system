@@ -7,17 +7,19 @@ public class AuthResponseDTO {
     private Role role;
     private java.util.Set<Store> assignedStores;
     private Store defaultStore;
+    private Organization organization;
 
     public AuthResponseDTO() {
     }
 
-    public AuthResponseDTO(String accessToken, String refreshToken, String username, Role role, java.util.Set<Store> assignedStores, Store defaultStore) {
+    public AuthResponseDTO(String accessToken, String refreshToken, String username, Role role, java.util.Set<Store> assignedStores, Store defaultStore, Organization organization) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
         this.username = username;
         this.role = role;
         this.assignedStores = assignedStores;
         this.defaultStore = defaultStore;
+        this.organization = organization;
     }
 
     public String getAccessToken() {
@@ -67,4 +69,6 @@ public class AuthResponseDTO {
     public void setDefaultStore(Store defaultStore) {
         this.defaultStore = defaultStore;
     }
+    public Organization getOrganization() { return organization; }
+    public void setOrganization(Organization organization) { this.organization = organization; }
 }

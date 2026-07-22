@@ -4,14 +4,14 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
-@Table(name = "category")
-public class Category {
+@Table(name = "category", uniqueConstraints = @UniqueConstraint(columnNames = {"organization_id", "name"}))
+public class Category extends TenantEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotNull(message = "Category name cannot be empty")
-    @Column(unique = true)
+    @Column(nullable = false)
     private String name;
 
     private String description;

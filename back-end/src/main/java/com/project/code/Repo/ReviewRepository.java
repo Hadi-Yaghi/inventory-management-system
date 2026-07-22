@@ -22,6 +22,8 @@ public interface ReviewRepository extends MongoRepository<Review, String> {
 //      - Parameters: Long storeId, Long productId
 
 // Example: public List<Review> findByStoreIdAndProductId(Long storeId, Long productId);
-    public Page<Review> findByStoreIdAndProductId(Long storeId, Long productId, Pageable pageable);
+    Page<Review> findByOrganizationIdAndStoreIdAndProductId(Long organizationId, Long storeId, Long productId, Pageable pageable);
+    Page<Review> findByOrganizationId(Long organizationId, Pageable pageable);
+    java.util.Optional<Review> findByIdAndOrganizationId(String id, Long organizationId);
 
 }

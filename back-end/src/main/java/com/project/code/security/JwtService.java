@@ -39,24 +39,31 @@ public class JwtService {
         return extractClaim(token, claims -> claims.get("role", String.class));
     }
 
+    public Long extractOrganizationId(String token) {
+        Number value = extractClaim(token, claims -> claims.get("organizationId", Number.class));
+        return value == null ? null : value.longValue();
+    }
+
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
 
-    public String generateAccessToken(String username, String role) {
+    public String generateAccessToken(String username, String role, Long organizationId) {
         return Jwts.builder()
                 .subject(username)
                 .claim("role", role)
+                .claim("organizationId", organizationId)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
                 .signWith(getSigningKey())
                 .compact();
     }
 
-    public String generateRefreshToken(String username) {
+    public String generateRefreshToken(String username, Long organizationId) {
         return Jwts.builder()
                 .subject(username)
+                .claim("organizationId", organizationId)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + refreshTokenExpiration))
                 .signWith(getSigningKey())

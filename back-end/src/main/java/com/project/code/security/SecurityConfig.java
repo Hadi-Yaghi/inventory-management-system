@@ -1,8 +1,8 @@
 package com.project.code.security;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -21,8 +21,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.List;
 import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -60,15 +60,18 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Public endpoints
                 .requestMatchers("/auth/login", "/auth/register", "/auth/google").permitAll()
+                .requestMatchers("/auth/accept-invitation", "/actuator/health").permitAll()
+                .requestMatchers("/organizations/public/invitation/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/uploads/**").permitAll()
                 .requestMatchers("/error").permitAll()
 
-                // Roles restrictions:
-                // 1. User management is restricted to ADMIN
+                // User & Organization endpoints
                 .requestMatchers("/auth/users/**", "/users/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/organizations/current", "/organizations/members").hasAnyRole("ADMIN", "MANAGER", "EMPLOYEE")
+                .requestMatchers("/organizations/**").hasAnyRole("ADMIN", "MANAGER")
 
-                // 2. Employee-allowed specific mutations (MUST come before general store/product blocks)
+                // Specific mutation permissions
                 .requestMatchers(HttpMethod.POST, "/store/placeOrder").hasAnyRole("ADMIN", "MANAGER", "EMPLOYEE")
                 .requestMatchers(HttpMethod.POST, "/inventory/adjustments/*/approve", "/inventory/adjustments/*/reject").hasAnyRole("ADMIN", "MANAGER")
                 .requestMatchers(HttpMethod.POST, "/inventory/adjustments").hasAnyRole("ADMIN", "MANAGER", "EMPLOYEE")
@@ -76,24 +79,18 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/inventory/**").hasAnyRole("ADMIN", "MANAGER", "EMPLOYEE")
                 .requestMatchers(HttpMethod.PUT, "/inventory/**").hasAnyRole("ADMIN", "MANAGER")
 
-                // 2b. Notifications endpoints
                 .requestMatchers("/notifications/**").hasAnyRole("ADMIN", "MANAGER", "EMPLOYEE")
-
-                // 2c. Customers endpoints
                 .requestMatchers("/customers/**").hasAnyRole("ADMIN", "MANAGER", "EMPLOYEE")
 
-                // 3. Deletions on products, stores, and inventory are restricted to ADMIN, MANAGER
                 .requestMatchers(HttpMethod.DELETE, "/product/**").hasAnyRole("ADMIN", "MANAGER")
                 .requestMatchers(HttpMethod.DELETE, "/store/**").hasAnyRole("ADMIN", "MANAGER")
                 .requestMatchers(HttpMethod.DELETE, "/inventory/**").hasAnyRole("ADMIN", "MANAGER")
 
-                // 4. Mutations on products and stores (POST/PUT) are restricted to ADMIN, MANAGER
                 .requestMatchers(HttpMethod.POST, "/product/**").hasAnyRole("ADMIN", "MANAGER")
                 .requestMatchers(HttpMethod.PUT, "/product/**").hasAnyRole("ADMIN", "MANAGER")
                 .requestMatchers(HttpMethod.POST, "/store/**").hasAnyRole("ADMIN", "MANAGER")
                 .requestMatchers(HttpMethod.PUT, "/store/**").hasAnyRole("ADMIN", "MANAGER")
 
-                // 5. Category writes restricted to ADMIN, MANAGER; Supplier writes restricted to ADMIN only
                 .requestMatchers(HttpMethod.POST, "/category/**").hasAnyRole("ADMIN", "MANAGER")
                 .requestMatchers(HttpMethod.PUT, "/category/**").hasAnyRole("ADMIN", "MANAGER")
                 .requestMatchers(HttpMethod.DELETE, "/category/**").hasAnyRole("ADMIN", "MANAGER")
@@ -101,41 +98,28 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/supplier/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/supplier/**").hasRole("ADMIN")
 
-                // 5.1 Purchase Order writes (POST/PUT/DELETE) restricted to ADMIN, MANAGER
                 .requestMatchers(HttpMethod.POST, "/purchase-orders/**").hasAnyRole("ADMIN", "MANAGER")
                 .requestMatchers(HttpMethod.PUT, "/purchase-orders/**").hasAnyRole("ADMIN", "MANAGER")
                 .requestMatchers(HttpMethod.DELETE, "/purchase-orders/**").hasAnyRole("ADMIN", "MANAGER")
 
-                // 6. Stock Transfers
                 .requestMatchers(HttpMethod.POST, "/transfers/initiate").hasAnyRole("ADMIN", "MANAGER", "EMPLOYEE")
                 .requestMatchers(HttpMethod.POST, "/transfers/*/confirm").hasAnyRole("ADMIN", "MANAGER")
                 .requestMatchers(HttpMethod.POST, "/transfers/*/cancel").hasAnyRole("ADMIN", "MANAGER")
                 .requestMatchers(HttpMethod.GET, "/transfers/**").hasAnyRole("ADMIN", "MANAGER", "EMPLOYEE")
 
-                // 7. Image file upload mutations restricted to ADMIN, MANAGER
                 .requestMatchers(HttpMethod.POST, "/uploads").hasAnyRole("ADMIN", "MANAGER")
-
-                // 8. Order Status Tracking
                 .requestMatchers(HttpMethod.PUT, "/orders/*/status").hasAnyRole("ADMIN", "MANAGER")
 
-                // 9. Returns & Refunds
                 .requestMatchers(HttpMethod.POST, "/returns/request").hasAnyRole("ADMIN", "MANAGER", "EMPLOYEE")
                 .requestMatchers(HttpMethod.POST, "/returns/*/approve", "/returns/*/reject").hasAnyRole("ADMIN", "MANAGER")
 
-                // 10. Reviews mutations
                 .requestMatchers(HttpMethod.POST, "/reviews").hasAnyRole("ADMIN", "MANAGER", "EMPLOYEE")
                 .requestMatchers(HttpMethod.POST, "/reviews/*/like", "/reviews/*/reply").hasAnyRole("ADMIN", "MANAGER", "EMPLOYEE")
 
-                // 11. Admin Activity Logs (ADMIN only)
                 .requestMatchers("/admin/activity-logs/**").hasRole("ADMIN")
-
-                // 12. Analytics Dashboard & Reports (ADMIN, MANAGER)
                 .requestMatchers("/analytics/**").hasAnyRole("ADMIN", "MANAGER")
 
-                // 13. Read access everywhere
                 .requestMatchers(HttpMethod.GET, "/**").hasAnyRole("ADMIN", "MANAGER", "EMPLOYEE")
-
-                // Any other request must be authenticated
                 .anyRequest().authenticated()
             )
             .authenticationProvider(authenticationProvider())

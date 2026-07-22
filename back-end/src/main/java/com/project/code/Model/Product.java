@@ -19,8 +19,8 @@ import jakarta.persistence.CascadeType;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import java.util.List;
 @Entity
-@Table(name = "product", uniqueConstraints = @UniqueConstraint(columnNames = "sku"))
-public class Product {
+@Table(name = "product", uniqueConstraints = @UniqueConstraint(columnNames = {"organization_id", "sku"}))
+public class Product extends TenantEntity {
 
 
 

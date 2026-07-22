@@ -9,8 +9,9 @@ public class RegisterRequestDTO {
     private String email;
     @NotNull(message = "Password cannot be empty")
     private String password;
-    @NotNull(message = "Role cannot be empty")
     private Role role;
+    private String organizationName;
+    private String invitationToken;
 
     public RegisterRequestDTO() {
     }
@@ -52,5 +53,21 @@ public class RegisterRequestDTO {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public String getOrganizationName() {
+        return organizationName;
+    }
+
+    public void setOrganizationName(String organizationName) {
+        this.organizationName = organizationName;
+    }
+
+    public String getInvitationToken() {
+        return invitationToken;
+    }
+
+    public void setInvitationToken(String invitationToken) {
+        this.invitationToken = invitationToken;
     }
 }

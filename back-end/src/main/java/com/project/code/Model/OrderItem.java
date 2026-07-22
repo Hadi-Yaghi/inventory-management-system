@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 @Entity
-public class OrderItem {
+public class OrderItem extends TenantEntity {
 
 
     @Id
@@ -62,4 +62,3 @@ public class OrderItem {
         this.price = price;
     }
 }
-

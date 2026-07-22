@@ -11,7 +11,7 @@ import java.util.List;
 
 @Entity
 
-public class Customer {
+public class Customer extends TenantEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

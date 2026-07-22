@@ -2,6 +2,8 @@ package com.project.code.config;
 
 import com.project.code.Model.Category;
 import com.project.code.Repo.CategoryRepository;
+import com.project.code.Repo.OrganizationRepository;
+import com.project.code.Model.Organization;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -18,6 +20,8 @@ public class CategoryMigrationRunner implements CommandLineRunner {
 
     @Autowired
     private CategoryRepository categoryRepository;
+    @Autowired
+    private OrganizationRepository organizationRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -35,6 +39,8 @@ public class CategoryMigrationRunner implements CommandLineRunner {
                     Category category = categoryRepository.findByName(categoryName)
                         .orElseGet(() -> {
                             Category newCat = new Category();
+                            Organization organization = organizationRepository.findBySlug("default-organization").orElse(null);
+                            newCat.setOrganization(organization);
                             newCat.setName(categoryName);
                             newCat.setDescription("Migrated category: " + categoryName);
                             return categoryRepository.save(newCat);

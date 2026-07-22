@@ -7,7 +7,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "purchase_order")
-public class PurchaseOrder {
+public class PurchaseOrder extends TenantEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

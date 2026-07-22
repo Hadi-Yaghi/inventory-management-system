@@ -22,6 +22,44 @@ public class EmailService {
     @Value("${spring.mail.username:noreply@example.com}")
     private String fromEmail;
 
+    public void sendInvitationEmail(String recipientEmail, String organizationName, String role, String token) {
+        String frontendBaseUrl = System.getenv("APP_FRONTEND_URL");
+        if (frontendBaseUrl == null || frontendBaseUrl.isBlank()) {
+            frontendBaseUrl = "http://localhost:5173";
+        } else {
+            frontendBaseUrl = frontendBaseUrl.split(",")[0];
+        }
+        String signupUrl = frontendBaseUrl + "/signup?token=" + token;
+
+        if (mailSender == null) {
+            System.out.println("SMTP is not configured. Invitation email link for " + recipientEmail + ": " + signupUrl);
+            return;
+        }
+
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(fromEmail);
+            helper.setTo(recipientEmail);
+            helper.setSubject("Invitation to join " + organizationName);
+            
+            String html = "<div style='font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #334155; background-color: #0f172a; color: #f8fafc; border-radius: 12px;'>"
+                    + "<h2 style='color: #6366f1;'>Workspace Invitation</h2>"
+                    + "<p>You have been invited to join <strong>" + organizationName + "</strong> as a <strong>" + role + "</strong>.</p>"
+                    + "<p>Click the button below to accept your invitation and complete your account setup:</p>"
+                    + "<p style='margin: 25px 0;'><a href='" + signupUrl + "' style='background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;'>Accept Invitation & Sign Up</a></p>"
+                    + "<p style='color: #94a3b8; font-size: 12px;'>Or copy and paste this link in your browser:<br/><a href='" + signupUrl + "' style='color: #818cf8;'>" + signupUrl + "</a></p>"
+                    + "</div>";
+
+            helper.setText(html, true);
+            mailSender.send(message);
+            System.out.println("Invitation email successfully sent to " + recipientEmail);
+        } catch (Exception e) {
+            System.err.println("Failed to send invitation email to " + recipientEmail + ": " + e.getMessage());
+        }
+    }
+
     public void sendOrderConfirmation(OrderDetails order, byte[] pdfBytes) {
         if (mailSender == null) {
             System.out.println("SMTP is not configured. Order confirmation email simulation for " + order.getCustomer().getEmail());
