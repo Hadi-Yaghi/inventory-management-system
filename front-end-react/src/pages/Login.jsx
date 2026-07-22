@@ -69,8 +69,12 @@ const Login = () => {
       await login(username, password);
       navigate('/');
     } catch (err) {
-      if (err.response?.status === 401) {
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else if (err.response?.status === 401) {
         setError('Invalid username or password');
+      } else if (!err.response) {
+        setError('Cannot connect to the backend server. Please verify your VITE_API_BASE_URL environment variable on your deployed site.');
       } else {
         setError('An error occurred during login. Please try again.');
       }
